@@ -3,6 +3,7 @@ import { HeaderNavbar } from '@/components/layout/HeaderNavbar';
 import { Footer } from '@/components/layout/Footer';
 import { ClientShell } from '@/components/layout/ClientShell';
 import { TrackPageClient } from '@/components/tracking/TrackPageClient';
+import { BrandedLoader } from '@/components/ui/BrandedLoader';
 import { getMenuItems } from '@/lib/menu';
 import { Metadata } from 'next';
 
@@ -20,7 +21,7 @@ export default async function OrdersPage() {
   return (
     <ClientShell menuItems={menuItems}>
       <HeaderNavbar />
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm font-bold text-zinc-400">Loading Order History...</div>}>
+      <Suspense fallback={<BrandedLoader size="fullscreen" message="Retrieving order history..." />}>
         <TrackPageClient />
       </Suspense>
       <Footer />
