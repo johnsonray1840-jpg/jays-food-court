@@ -15,6 +15,7 @@ export interface RawOrderItemSwallow extends RawOrderItemPortion {}
 export interface RawOrderItemAddon extends RawOrderItemPortion {}
 
 export interface RawOrderItemRequest {
+  id?: string | number; // Fallback menu dish reference ID
   menuItemId?: string | number;
   menuId?: string | number; // Backward compatibility with cart line item
   name?: string; // Optional advisory name, IGNORED for pricing
@@ -130,7 +131,7 @@ export async function calculateServerAuthoritativeOrder(
   let calculatedSubtotal = 0;
 
   for (const raw of requestedItems) {
-    const rawId = raw.menuItemId ?? raw.menuId;
+    const rawId = raw.menuItemId ?? raw.menuId ?? raw.id;
     const qty = Math.max(1, Math.min(50, Number(raw.quantity ?? raw.qty ?? 1)));
     const notes = (raw.notes || raw.note || '').trim().slice(0, 200) || undefined;
 

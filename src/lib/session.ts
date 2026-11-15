@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 
 const SESSION_COOKIE_NAME = 'jfc_customer_session';
+export const ORDER_ACCESS_COOKIE_NAME = 'jfc_order_access';
 
 function getSessionSecret(): string {
   const secret = process.env.SESSION_SECRET;
@@ -130,4 +131,103 @@ export async function clearCustomerSessionCookie() {
     path: '/',
     maxAge: 0
   });
+}
+
+interface OrderAccessTokenData {
+  orderCodes: string[];
+  updatedAt: number;
+}
+
+/**
+ * Signs a compact list of order codes the current browser is authorized to track/communicate on.
+ */
+export function signOrderAccessToken(orderCodes: string[]): string {
+  const secret = getSessionSecret();
+  const normalized = Array.from(
+    new Set(orderCodes.map((c) => c.trim().toUpperCase()).filter(Boolean))
+  ).slice(-20);
+  const data: OrderAccessTokenData = {
+    orderCodes: normalized,
+    updatedAt: Date.now()
+  };
+  const payload = Buffer.from(JSON.stringify(data)).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('base64url');
+  return `${payload}.${signature}`;
+}
+
+/**
+ * Verifies a signed jfc_order_access token and returns the authorized order codes.
+ */
+export function verifyOrderAccessToken(token: string): string[] {
+  try {
+    if (!token || typeof token !== 'string') return [];
+    const parts = token.split('.');
+    if (parts.length !== 2) return [];
+
+    const [payload, signature] = parts;
+    const secret = getSessionSecret();
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('base64url');
+
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expectedSignature);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return [];
+    }
+
+    const data: OrderAccessTokenData = JSON.parse(
+      Buffer.from(payload, 'base64url').toString('utf8')
+    );
+
+    if (!data.updatedAt || typeof data.updatedAt !== 'number' || isNaN(data.updatedAt)) {
+      return [];
+    }
+
+    const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+    if (Date.now() - data.updatedAt > MAX_AGE_MS || data.updatedAt > Date.now() + 60000) {
+      return [];
+    }
+
+    if (!Array.isArray(data.orderCodes)) return [];
+    return data.orderCodes.map((c) => String(c).trim().toUpperCase()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Checks whether a signed jfc_order_access cookie value authorizes a specific order code.
+ */
+export function hasOrderAccess(reqCookieValue: string | undefined, orderCode: string): boolean {
+  if (!reqCookieValue || !orderCode) return false;
+  const target = orderCode.trim().toUpperCase();
+  return verifyOrderAccessToken(reqCookieValue).includes(target);
+}
+
+/**
+ * Appends an orderCode to the HTTP-only jfc_order_access cookie.
+ */
+export async function addOrderAccessCookie(orderCode: string): Promise<string> {
+  const cleanCode = orderCode.trim().toUpperCase();
+  const cookieStore = await cookies();
+  const existingVal = cookieStore.get(ORDER_ACCESS_COOKIE_NAME)?.value;
+  const existingCodes = existingVal ? verifyOrderAccessToken(existingVal) : [];
+  const nextToken = signOrderAccessToken([...existingCodes, cleanCode]);
+
+  cookieStore.set({
+    name: ORDER_ACCESS_COOKIE_NAME,
+    value: nextToken,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 60 // 60 days
+  });
+
+  return nextToken;
 }

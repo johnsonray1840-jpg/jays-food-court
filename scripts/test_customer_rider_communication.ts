@@ -57,96 +57,142 @@ async function runCommunicationTests() {
   // Find an active order to link test record to
   const { data: sampleOrder } = await supabase
     .from('orders')
-    .select('id, order_code')
+    .select('id, order_code, phone')
     .limit(1)
     .single();
 
   if (!sampleOrder) {
     console.log('⚠️ No sample order found in DB, skipping row-insert test.');
   } else {
-    // Insert a test message
-    const { data: insertedMsg, error: insertErr } = await supabase
-      .from('order_messages')
+    const { data: tempConv, error: convErr } = await supabase
+      .from('order_conversations')
       .insert({
         order_id: sampleOrder.id,
         order_code: sampleOrder.order_code,
-        sender_role: 'customer',
-        sender_id: 'test-user-id',
-        sender_name: 'Test Customer',
-        content: 'Verification test message: courier communication active.',
-        delivery_status: 'delivered'
+        customer_id: null,
+        customer_phone: sampleOrder.phone || '+2348000000000',
+        rider_id: null,
+        status: 'active'
       })
       .select()
       .single();
 
-    if (insertErr || !insertedMsg) {
-      throw new Error(`Message insertion failed: ${insertErr?.message}`);
+    if (convErr || !tempConv) {
+      throw new Error(`Temporary conversation creation failed: ${convErr?.message}`);
     }
-    console.log(`✓ Message inserted with ID: ${insertedMsg.id}, delivery_status: ${insertedMsg.delivery_status}`);
 
-    // Update to read
-    const { data: updatedMsg, error: updateErr } = await supabase
-      .from('order_messages')
-      .update({
-        delivery_status: 'read',
-        read_at: new Date().toISOString()
-      })
-      .eq('id', insertedMsg.id)
-      .select()
-      .single();
+    let insertedMsgId: string | null = null;
+    let insertedCallId: string | null = null;
 
-    if (updateErr || !updatedMsg || updatedMsg.delivery_status !== 'read') {
-      throw new Error(`Message read status update failed: ${updateErr?.message}`);
+    try {
+      // Insert a test message
+      const { data: insertedMsg, error: insertErr } = await supabase
+        .from('order_messages')
+        .insert({
+          conversation_id: tempConv.id,
+          order_id: sampleOrder.id,
+          order_code: sampleOrder.order_code,
+          sender_role: 'customer',
+          sender_id: 'test-user-id',
+          sender_name: 'Test Customer',
+          content: 'Verification test message: courier communication active.',
+          delivery_status: 'delivered'
+        })
+        .select()
+        .single();
+
+      if (insertErr || !insertedMsg) {
+        throw new Error(`Message insertion failed: ${insertErr?.message}`);
+      }
+      insertedMsgId = insertedMsg.id;
+      console.log(`✓ Message inserted with ID: ${insertedMsg.id}, delivery_status: ${insertedMsg.delivery_status}`);
+
+      // Update to read
+      const { data: updatedMsg, error: updateErr } = await supabase
+        .from('order_messages')
+        .update({
+          delivery_status: 'read',
+          read_at: new Date().toISOString()
+        })
+        .eq('id', insertedMsg.id)
+        .select()
+        .single();
+
+      if (updateErr || !updatedMsg || updatedMsg.delivery_status !== 'read') {
+        throw new Error(`Message read status update failed: ${updateErr?.message}`);
+      }
+      console.log(`✓ Message successfully transitioned to read at: ${updatedMsg.read_at}`);
+
+      // Clean up test message
+      await supabase.from('order_messages').delete().eq('id', insertedMsg.id);
+      insertedMsgId = null;
+      console.log('✓ Test message cleaned up.');
+
+      // 4. Test call lifecycle record creation
+      console.log('[Test 4] Testing voice call session record & termination...');
+      const { data: insertedCall, error: callInsertErr } = await supabase
+        .from('call_sessions')
+        .insert({
+          conversation_id: tempConv.id,
+          order_id: sampleOrder.id,
+          order_code: sampleOrder.order_code,
+          caller_id: 'test-rider-id',
+          caller_role: 'rider',
+          caller_name: 'Test Rider',
+          receiver_id: 'test-user-id',
+          receiver_role: 'customer',
+          receiver_name: 'Test Customer',
+          status: 'ringing',
+          livekit_room_id: `order-call-${sampleOrder.order_code}-test`,
+          started_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (callInsertErr || !insertedCall) {
+        throw new Error(`Call session record creation failed: ${callInsertErr?.message}`);
+      }
+      insertedCallId = insertedCall.id;
+      console.log(`✓ Call session initiated with status: ${insertedCall.status}`);
+
+      // Transition call to ended with duration
+      const { data: endedCall, error: callEndErr } = await supabase
+        .from('call_sessions')
+        .update({
+          status: 'ended',
+          ended_at: new Date().toISOString(),
+          duration_seconds: 45,
+          end_reason: 'normal_hangup'
+        })
+        .eq('id', insertedCall.id)
+        .select()
+        .single();
+
+      if (callEndErr || !endedCall || endedCall.status !== 'ended' || endedCall.duration_seconds !== 45) {
+        throw new Error(`Call completion update failed: ${callEndErr?.message}`);
+      }
+
+      // Verify order_calls backwards-compatibility view reflects the session
+      const { data: viewCall, error: viewErr } = await supabase
+        .from('order_calls')
+        .select('id, status, duration_seconds, callee_role, room_name')
+        .eq('id', insertedCall.id)
+        .single();
+
+      if (viewErr || !viewCall || viewCall.status !== 'ended' || viewCall.callee_role !== 'customer') {
+        throw new Error(`order_calls view verification failed: ${viewErr?.message}`);
+      }
+      console.log(`✓ Call session ended with duration: ${endedCall.duration_seconds}s (verified via call_sessions & order_calls view)`);
+    } finally {
+      if (insertedCallId) {
+        await supabase.from('call_sessions').delete().eq('id', insertedCallId);
+      }
+      if (insertedMsgId) {
+        await supabase.from('order_messages').delete().eq('id', insertedMsgId);
+      }
+      await supabase.from('order_conversations').delete().eq('id', tempConv.id);
+      console.log('✓ Test call session & temporary conversation cleaned up.');
     }
-    console.log(`✓ Message successfully transitioned to read at: ${updatedMsg.read_at}`);
-
-    // Clean up test message
-    await supabase.from('order_messages').delete().eq('id', insertedMsg.id);
-    console.log('✓ Test message cleaned up.');
-  }
-
-  // 4. Test call lifecycle record creation
-  if (sampleOrder) {
-    console.log('[Test 4] Testing voice call session record & termination...');
-    const { data: insertedCall, error: callInsertErr } = await supabase
-      .from('order_calls')
-      .insert({
-        order_id: sampleOrder.id,
-        order_code: sampleOrder.order_code,
-        caller_role: 'rider',
-        caller_name: 'Test Rider',
-        callee_role: 'customer',
-        status: 'ringing',
-        room_name: `order-call-${sampleOrder.order_code}-test`
-      })
-      .select()
-      .single();
-
-    if (callInsertErr || !insertedCall) {
-      throw new Error(`Call session record creation failed: ${callInsertErr?.message}`);
-    }
-    console.log(`✓ Call session initiated with status: ${insertedCall.status}`);
-
-    // Transition call to completed with duration
-    const { data: endedCall, error: callEndErr } = await supabase
-      .from('order_calls')
-      .update({
-        status: 'completed',
-        ended_at: new Date().toISOString(),
-        duration_seconds: 45
-      })
-      .eq('id', insertedCall.id)
-      .select()
-      .single();
-
-    if (callEndErr || !endedCall || endedCall.status !== 'completed' || endedCall.duration_seconds !== 45) {
-      throw new Error(`Call completion update failed: ${callEndErr?.message}`);
-    }
-    console.log(`✓ Call session completed with duration: ${endedCall.duration_seconds}s`);
-
-    // Clean up test call
-    await supabase.from('order_calls').delete().eq('id', insertedCall.id);
-    console.log('✓ Test call session cleaned up.');
   }
 
   console.log('--- ALL CUSTOMER-RIDER COMMUNICATION TESTS PASSED SUCCESSFULLY! ---');

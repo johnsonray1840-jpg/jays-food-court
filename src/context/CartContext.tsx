@@ -58,7 +58,16 @@ export function CartProvider({ children, menuItems = [] }: { children: React.Rea
     }, 2800);
   }, []);
 
-  // Hydrate local state on initial client mount
+  const setLastOrderId = useCallback((id: string) => {
+    setLastOrderIdState(id);
+    try {
+      localStorage.setItem('jfc_last_order', id);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Hydrate local state on initial client mount and handle Paystack redirect callback
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem('jfc_cart');
@@ -69,10 +78,34 @@ export function CartProvider({ children, menuItems = [] }: { children: React.Rea
 
       const savedLast = localStorage.getItem('jfc_last_order');
       if (savedLast) setLastOrderIdState(savedLast);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const paystackRef = urlParams.get('reference') || urlParams.get('trxref');
+      if (paystackRef && window.location.pathname !== '/track') {
+        showToast('Verifying your Paystack payment...');
+        fetch(`/api/payments/verify?reference=${encodeURIComponent(paystackRef)}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.orderCode) {
+              setLastOrderId(data.orderCode);
+              localStorage.setItem('jfc_has_paid_order', 'true');
+              showToast(`Payment confirmed! Order #${data.orderCode} sent to the kitchen!`);
+              window.history.replaceState({}, document.title, window.location.pathname);
+              if (window.location.pathname === '/') {
+                window.location.assign(`/track?order=${encodeURIComponent(data.orderCode)}`);
+              }
+            } else {
+              showToast(data.message || 'Payment verification could not be confirmed.', 'error');
+            }
+          })
+          .catch(() => {
+            showToast('Verification check failed. Please check your order status.', 'error');
+          });
+      }
     } catch {
       // Local storage fallback
     }
-  }, []);
+  }, [setLastOrderId, showToast]);
 
   // Sync cart changes to localStorage
   const syncCart = useCallback((updated: CartLineItem[]) => {
@@ -88,15 +121,6 @@ export function CartProvider({ children, menuItems = [] }: { children: React.Rea
     setDeliveryLocationState(loc);
     try {
       localStorage.setItem('jfc_loc', loc);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  const setLastOrderId = useCallback((id: string) => {
-    setLastOrderIdState(id);
-    try {
-      localStorage.setItem('jfc_last_order', id);
     } catch {
       // ignore
     }
@@ -175,32 +199,38 @@ export function CartProvider({ children, menuItems = [] }: { children: React.Rea
       setIsPlacingOrder(true);
 
       try {
+        const idempotencyKey = 'idemp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
         const orderPayload = {
-          items: cart.map((i) => ({
-            id: i.id,
-            name: i.name,
-            qty: i.qty,
-            unitPrice: i.unit,
-            swallow: i.swallow,
-            swallows: i.swallows,
-            proteins: i.proteins,
-            addons: i.addons,
-          })),
+          idempotencyKey,
           customerName: details.customerName,
-          customerEmail: details.email,
-          customerPhone: details.phone,
-          deliveryAddress: details.address,
+          email: details.email,
+          phone: details.phone,
+          address: details.address,
           landmark: details.landmark,
           deliveryInstructions: details.deliveryInstructions,
-          paymentMode: 'online',
+          paymentMode: 'online' as const,
           promoCode: details.promoCode,
           deliveryCoordinates: details.deliveryCoordinates,
           deliveryZoneId: details.deliveryZoneId,
+          items: cart.map((i) => ({
+            menuItemId: i.id,
+            menuId: i.id,
+            qty: i.qty,
+            swallow: i.swallow || null,
+            swallows: i.swallows || [],
+            extras: i.extras || [],
+            proteins: i.proteins || [],
+            addons: i.addons || [],
+            note: i.note || undefined,
+          })),
         };
 
         const res = await fetch('/api/orders', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey,
+          },
           body: JSON.stringify(orderPayload),
         });
 
@@ -210,14 +240,21 @@ export function CartProvider({ children, menuItems = [] }: { children: React.Rea
           throw new Error(data.error || 'Failed to place order');
         }
 
+        const orderId = data.order?.order_number || data.order?.id || data.orderCode;
+        if (!orderId) {
+          throw new Error('Order created but order reference was missing in server response.');
+        }
+
+        const customerEmail = details.email || `${details.phone.replace(/[^0-9]/g, '')}@guest.jaysfoodcourt.com`;
+
         // Initialize Paystack payment
         const payRes = await fetch('/api/payments/initialize', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            orderCode: data.orderCode,
-            customerEmail: details.email || `${details.phone.replace(/[^0-9]/g, '')}@jaysfoodcourt.ng`,
-            amount: data.totalAmount,
+            orderCode: orderId,
+            email: customerEmail,
+            callbackUrl: `${window.location.origin}/track?order=${encodeURIComponent(orderId)}`,
           }),
         });
 
@@ -227,7 +264,7 @@ export function CartProvider({ children, menuItems = [] }: { children: React.Rea
           throw new Error(payData.error || 'Payment gateway initialization failed');
         }
 
-        setLastOrderId(data.orderCode);
+        setLastOrderId(orderId);
         clearCart();
         setIsCartOpen(false);
 

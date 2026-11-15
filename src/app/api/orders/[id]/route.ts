@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
-import { getCustomerSession } from '@/lib/session';
+import { getCustomerSession, hasOrderAccess, ORDER_ACCESS_COOKIE_NAME } from '@/lib/session';
 import { getStaffSession } from '@/lib/auth';
+import { normalizeNigerianPhone } from '@/lib/phone';
 import { Order, OrderStatus } from '@/types';
 
 const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.json');
@@ -75,6 +76,7 @@ export async function GET(
           delivery_landmark,
           delivery_zone_id,
           delivery_details,
+          delivery_otp,
           status,
           subtotal,
           discount_amount,
@@ -135,10 +137,19 @@ export async function GET(
   const isAssignedRider = Boolean(
     staff && staff.role === 'rider' && orderRecord.assigned_rider_id && orderRecord.assigned_rider_id === staff.id
   );
+  const normOrderPhone = orderPhone ? (normalizeNigerianPhone(orderPhone) || orderPhone) : '';
+  const normSessPhone = customerSession?.phone
+    ? (normalizeNigerianPhone(customerSession.phone) || customerSession.phone)
+    : '';
+  const orderAccessCookie = req.cookies.get(ORDER_ACCESS_COOKIE_NAME)?.value;
+  const canonicalOrderCode = orderRecord.order_code || orderRecord.id || orderLookup;
+  const hasPerOrderAccess = hasOrderAccess(orderAccessCookie, canonicalOrderCode);
+
   const isOrderOwner = Boolean(
-    customerSession &&
-    ((orderCustomerId && customerSession.customerId === orderCustomerId) ||
-     (orderPhone && customerSession.phone === orderPhone))
+    hasPerOrderAccess ||
+    (customerSession &&
+      ((orderCustomerId && customerSession.customerId === orderCustomerId) ||
+       (normOrderPhone && normSessPhone && normSessPhone === normOrderPhone)))
   );
 
   // Riders cannot inspect orders that are unassigned or assigned to another courier
@@ -200,6 +211,7 @@ export async function GET(
       paymentMode: orderRecord.payment_method === 'cash_on_delivery' ? 'cod' : 'transfer',
       status: orderRecord.status as OrderStatus,
       eta: orderRecord.estimated_delivery_time || '18 - 25 Mins',
+      isAuthorizedCustomer: Boolean(isOrderOwner || isPrivilegedStaff),
       rider: assignedRider
         ? {
             name: assignedRider.full_name,
@@ -222,6 +234,7 @@ export async function GET(
     deliveryLongitude: orderRecord.deliveryLongitude || orderRecord.deliveryCoordinates?.longitude || (orderRecord.deliveryDetails?.longitude ? Number(orderRecord.deliveryDetails.longitude) : undefined),
     deliveryLandmark: orderRecord.deliveryLandmark || orderRecord.deliveryDetails?.landmark,
     deliveryOtp: isOrderOwner || isPrivilegedStaff ? (orderRecord.deliveryOtp || orderRecord.delivery_otp) : undefined,
+    isAuthorizedCustomer: Boolean(isOrderOwner || isPrivilegedStaff),
   };
 
   return NextResponse.json(sanitizedLocal);

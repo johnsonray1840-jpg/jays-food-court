@@ -19,11 +19,46 @@ import { formatNaira } from '@/lib/utils';
 
 export function TrackPageClient() {
   const searchParams = useSearchParams();
-  const urlOrder = searchParams.get('order') || searchParams.get('reference') || '';
-  const { lastOrderId } = useCart();
-  const [selectedOrderCode, setSelectedOrderCode] = useState(urlOrder || lastOrderId || '');
+  const orderParam = searchParams.get('order') || '';
+  const paystackRef = searchParams.get('reference') || searchParams.get('trxref') || '';
+  const inferredOrderFromRef = !orderParam && paystackRef ? paystackRef.replace(/-\d{10,}$/, '') : '';
+  const { lastOrderId, setLastOrderId, showToast } = useCart();
+  const [selectedOrderCode, setSelectedOrderCode] = useState(
+    orderParam || inferredOrderFromRef || lastOrderId || ''
+  );
   const [customerOrders, setCustomerOrders] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  // Verify Paystack payment callback when arriving on /track?reference=...
+  useEffect(() => {
+    if (!paystackRef) return;
+    let cancelled = false;
+
+    fetch(`/api/payments/verify?reference=${encodeURIComponent(paystackRef)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.orderCode) {
+          setSelectedOrderCode(data.orderCode);
+          setLastOrderId(data.orderCode);
+        }
+        if (data.success && data.orderCode) {
+          localStorage.setItem('jfc_has_paid_order', 'true');
+          showToast(`Payment confirmed! Order #${data.orderCode} sent to the kitchen!`);
+        } else if (data.message) {
+          showToast(data.message, 'error');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          showToast('Verification check failed. Please refresh your order status below.', 'error');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paystackRef, setLastOrderId, showToast]);
 
   // Fetch recent customer authenticated orders
   useEffect(() => {

@@ -31,7 +31,7 @@ export async function POST(
   }
 
   const body = await req.json().catch(() => ({}));
-  const callId = body.callId;
+  const callId = body.callId || body.call_id;
 
   if (!callId) {
     return NextResponse.json({ error: 'callId is required' }, { status: 400 });

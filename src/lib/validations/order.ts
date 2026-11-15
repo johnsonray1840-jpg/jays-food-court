@@ -14,6 +14,7 @@ export const orderItemAddonSchema = orderItemPortionSchema;
 
 export const orderItemSchema = z
   .object({
+    id: z.union([z.string().min(1), z.number().int().positive()]).optional(),
     menuItemId: z.union([z.string().min(1), z.number().int().positive()]).optional(),
     menuId: z.union([z.string().min(1), z.number().int().positive()]).optional(),
     quantity: z.number().int().min(1).max(50).optional(),
@@ -30,7 +31,7 @@ export const orderItemSchema = z
     name: z.string().optional(),
     unit: z.number().optional()
   })
-  .refine((data) => data.menuItemId !== undefined || data.menuId !== undefined, {
+  .refine((data) => data.menuItemId !== undefined || data.menuId !== undefined || data.id !== undefined, {
     message: 'Each order item must specify a valid menu dish reference'
   });
 

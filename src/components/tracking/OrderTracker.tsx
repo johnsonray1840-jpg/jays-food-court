@@ -67,6 +67,10 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [verifyPhoneInput, setVerifyPhoneInput] = useState('');
+  const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
+  const [verifyPhoneError, setVerifyPhoneError] = useState('');
+  const [commActionError, setCommActionError] = useState('');
 
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -79,6 +83,8 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
     incomingCall,
     channelConnected,
     isClosed: isCommClosed,
+    error: commError,
+    clearError: clearCommError,
     sendMessage,
     sendTyping,
     startCall,
@@ -90,7 +96,11 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
     orderCode: trackedOrder?.id || '',
     orderStatus: trackedOrder?.status || '',
     userRole: 'customer',
-    enabled: Boolean(trackedOrder?.id && trackedOrder?.rider)
+    enabled: Boolean(
+      trackedOrder?.id &&
+      trackedOrder?.rider &&
+      trackedOrder?.isAuthorizedCustomer !== false
+    )
   });
 
   // Sync with initialOrderId prop when new order is placed
@@ -179,6 +189,9 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
 
     setIsLoading(true);
     setErrorMsg('');
+    setVerifyPhoneInput('');
+    setVerifyPhoneError('');
+    setCommActionError('');
 
     try {
       const res = await fetch(`/api/orders/${cleanId}`);
@@ -193,6 +206,33 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
       setErrorMsg('Failed to connect to order server.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCustomerPhone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!trackedOrder?.id || !verifyPhoneInput.trim()) return;
+    setIsVerifyingPhone(true);
+    setVerifyPhoneError('');
+
+    try {
+      const res = await fetch(`/api/orders/${encodeURIComponent(trackedOrder.id)}/verify-customer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: verifyPhoneInput.trim() })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setVerifyPhoneInput('');
+        setCommActionError('');
+        await pollStatus(trackedOrder.id);
+      } else {
+        setVerifyPhoneError(data.error || 'Unable to verify phone number.');
+      }
+    } catch {
+      setVerifyPhoneError('Network error while verifying phone number.');
+    } finally {
+      setIsVerifyingPhone(false);
     }
   };
 
@@ -482,48 +522,101 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
 
             {/* Rider Concierge Contact Card (When Assigned) */}
             {currentIdx >= 4 && trackedOrder.rider && (
-              <div className="bg-brand-cream/60 rounded-2xl p-4 sm:p-5 border border-brand-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-brand-gold flex items-center justify-center text-brand-ink font-black shrink-0">
-                    <Bike className="w-5 h-5" />
+              <div className="bg-brand-cream/60 rounded-2xl p-4 sm:p-5 border border-brand-line space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-brand-gold flex items-center justify-center text-brand-ink font-black shrink-0">
+                      <Bike className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="font-bold text-xs sm:text-sm text-brand-ink truncate">{trackedOrder.rider.name}</h5>
+                      <p className="text-[11px] sm:text-xs text-brand-muted truncate">
+                        Jay&apos;s Dedicated Courier {trackedOrder.rider.rating ? `• ${trackedOrder.rider.rating}` : ''}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h5 className="font-bold text-xs sm:text-sm text-brand-ink truncate">{trackedOrder.rider.name}</h5>
-                    <p className="text-[11px] sm:text-xs text-brand-muted truncate">
-                      Jay&apos;s Dedicated Courier {trackedOrder.rider.rating ? `• ${trackedOrder.rider.rating}` : ''}
+
+                  {/* Secure In-App Communication Actions (Masked phone numbers) */}
+                  {trackedOrder.isAuthorizedCustomer !== false && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCommActionError('');
+                          clearCommError();
+                          setIsChatOpen(true);
+                          markAsRead();
+                        }}
+                        className="relative flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#17140D] hover:bg-zinc-800 text-brand-gold text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-sm"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>Chat</span>
+                        {unreadCount > 0 && (
+                          <span className="w-5 h-5 rounded-full bg-brand-gold text-zinc-950 text-[10px] font-black flex items-center justify-center">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setCommActionError('');
+                          clearCommError();
+                          const res = await startCall();
+                          if (res?.error) {
+                            setCommActionError(res.error);
+                          }
+                        }}
+                        disabled={isCommClosed}
+                        className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-sm"
+                      >
+                        <Phone className="w-4 h-4" />
+                        <span>In-App Call</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {trackedOrder.isAuthorizedCustomer === false && (
+                  <form
+                    onSubmit={handleVerifyCustomerPhone}
+                    className="pt-3 border-t border-brand-line/70 space-y-2.5"
+                  >
+                    <p className="text-xs font-semibold text-brand-ink">
+                      Verify the phone number used for this order to unlock private courier chat and voice calls:
                     </p>
-                  </div>
-                </div>
-
-                {/* Secure In-App Communication Actions (Masked phone numbers) */}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsChatOpen(true);
-                      markAsRead();
-                    }}
-                    className="relative flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#17140D] hover:bg-zinc-800 text-brand-gold text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-sm"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Chat</span>
-                    {unreadCount > 0 && (
-                      <span className="w-5 h-5 rounded-full bg-brand-gold text-zinc-950 text-[10px] font-black flex items-center justify-center">
-                        {unreadCount}
-                      </span>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="tel"
+                        value={verifyPhoneInput}
+                        onChange={(e) => setVerifyPhoneInput(e.target.value)}
+                        placeholder="e.g. 0803 123 4567"
+                        className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-brand-line text-xs sm:text-sm text-brand-ink focus:outline-none focus:border-brand-gold"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isVerifyingPhone || !verifyPhoneInput.trim()}
+                        className="px-4 py-2.5 rounded-xl bg-[#17140D] hover:bg-zinc-800 disabled:opacity-40 text-brand-gold text-xs font-bold transition shrink-0"
+                      >
+                        {isVerifyingPhone ? 'Verifying...' : 'Unlock Chat & Call'}
+                      </button>
+                    </div>
+                    {verifyPhoneError && (
+                      <p className="text-xs text-rose-600 font-medium flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{verifyPhoneError}</span>
+                      </p>
                     )}
-                  </button>
+                  </form>
+                )}
 
-                  <button
-                    type="button"
-                    onClick={() => startCall()}
-                    disabled={isCommClosed}
-                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-sm"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span>In-App Call</span>
-                  </button>
-                </div>
+                {(commActionError || commError) && trackedOrder.isAuthorizedCustomer !== false && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{commActionError || commError}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -531,7 +624,7 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
         )}
 
         {/* Private In-App Messaging Modal */}
-        {trackedOrder && (
+        {trackedOrder && trackedOrder.isAuthorizedCustomer !== false && (
           <OrderChatModal
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}
@@ -543,11 +636,16 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
             counterpartTyping={counterpartTyping}
             isClosed={isCommClosed}
             channelConnected={channelConnected}
+            commError={commActionError || commError}
             onSendMessage={sendMessage}
             onSendTyping={sendTyping}
-            onStartCall={() => {
+            onStartCall={async () => {
               setIsChatOpen(false);
-              startCall();
+              setCommActionError('');
+              const res = await startCall();
+              if (res?.error) {
+                setCommActionError(res.error);
+              }
             }}
             onMarkRead={markAsRead}
           />
@@ -570,7 +668,7 @@ export function OrderTracker({ initialOrderId = '' }: OrderTrackerProps) {
         {incomingCall && (
           <IncomingCallModal
             call={incomingCall}
-            counterpartName={trackedOrder?.rider?.name || 'Your Courier'}
+            counterpartName={incomingCall.caller_name || trackedOrder?.rider?.name || 'Your Courier'}
             onAccept={(call) => {
               notificationManager.stopIncomingRingtone();
               setActiveCall(call);

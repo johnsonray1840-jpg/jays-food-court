@@ -14,7 +14,8 @@ import {
   WifiOff,
   Sparkles,
   Clock,
-  Radio
+  Radio,
+  AlertCircle
 } from 'lucide-react';
 import { OrderMessage } from '@/hooks/useOrderCommunication';
 
@@ -29,6 +30,7 @@ interface OrderChatModalProps {
   counterpartTyping: boolean;
   isClosed: boolean;
   channelConnected?: boolean;
+  commError?: string | null;
   onSendMessage: (content: string) => Promise<boolean>;
   onSendTyping: () => void;
   onStartCall: () => void;
@@ -60,6 +62,7 @@ export function OrderChatModal({
   counterpartTyping,
   isClosed,
   channelConnected = true,
+  commError = null,
   onSendMessage,
   onSendTyping,
   onStartCall,
@@ -67,6 +70,7 @@ export function OrderChatModal({
 }: OrderChatModalProps) {
   const [inputText, setInputText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
@@ -83,9 +87,16 @@ export function OrderChatModal({
     const text = (textToSend || inputText).trim();
     if (!text || submitting || isClosed) return;
 
+    const wasTypedInput = !textToSend;
+    setLocalError(null);
     setSubmitting(true);
-    setInputText('');
-    await onSendMessage(text);
+    if (wasTypedInput) setInputText('');
+
+    const ok = await onSendMessage(text);
+    if (!ok) {
+      if (wasTypedInput) setInputText(text);
+      setLocalError('Message could not be sent. Please check your connection and try again.');
+    }
     setSubmitting(false);
   };
 
@@ -253,6 +264,14 @@ export function OrderChatModal({
                 {reply}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Error Banner */}
+        {(localError || commError) && (
+          <div className="bg-rose-50 border-t border-rose-200 px-4 py-2 flex items-center gap-2 text-xs text-rose-700 font-medium shrink-0">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{commError || localError}</span>
           </div>
         )}
 

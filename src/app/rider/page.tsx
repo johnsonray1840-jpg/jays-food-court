@@ -69,6 +69,12 @@ export default function RiderPortalPage() {
 
   // In-App Rider Communication
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [commActionError, setCommActionError] = useState<string | null>(null);
+
+  const isSelectedOrderAssigned = Boolean(
+    selectedOrder?.id &&
+    ['assigned_to_rider', 'picked_up', 'out_for_delivery', 'dispatched'].includes(selectedOrder.status)
+  );
 
   const {
     messages,
@@ -78,6 +84,8 @@ export default function RiderPortalPage() {
     incomingCall,
     channelConnected,
     isClosed: isCommClosed,
+    error: commError,
+    clearError: clearCommError,
     sendMessage,
     sendTyping,
     startCall,
@@ -89,7 +97,7 @@ export default function RiderPortalPage() {
     orderCode: selectedOrder?.id || '',
     orderStatus: selectedOrder?.status || '',
     userRole: 'rider',
-    enabled: Boolean(selectedOrder?.id)
+    enabled: isSelectedOrderAssigned
   });
 
   // Realtime Sync & Recovery State
@@ -135,12 +143,23 @@ export default function RiderPortalPage() {
         const dispatchable = data.filter((o) =>
           ['ready_for_pickup', 'assigned_to_rider', 'picked_up', 'out_for_delivery', 'dispatched'].includes(o.status)
         );
+        const activeAssigned = dispatchable.filter((o) =>
+          ['assigned_to_rider', 'picked_up', 'out_for_delivery', 'dispatched'].includes(o.status)
+        );
         setOrders(dispatchable);
-        if (!selectedOrder && dispatchable.length > 0) {
-          setSelectedOrder(dispatchable[0]);
+        if (!selectedOrder && (activeAssigned.length > 0 || dispatchable.length > 0)) {
+          setSelectedOrder(activeAssigned[0] || dispatchable[0]);
         } else if (selectedOrder) {
           const updated = dispatchable.find((o) => o.id === selectedOrder.id);
-          if (updated) setSelectedOrder(updated);
+          if (updated) {
+            if (updated.status === 'ready_for_pickup' && activeAssigned.length > 0) {
+              setSelectedOrder(activeAssigned[0]);
+            } else {
+              setSelectedOrder(updated);
+            }
+          } else {
+            setSelectedOrder(activeAssigned[0] || dispatchable[0] || null);
+          }
         }
       }
     } catch {
@@ -861,32 +880,45 @@ export default function RiderPortalPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsChatOpen(true);
-                          markAsRead();
-                        }}
-                        className="relative px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-brand-gold flex items-center gap-1.5 transition shadow-sm"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>Chat</span>
-                        {unreadCount > 0 && (
-                          <span className="w-4 h-4 rounded-full bg-brand-gold text-zinc-950 text-[10px] font-black flex items-center justify-center">
-                            {unreadCount}
-                          </span>
-                        )}
-                      </button>
+                      {isSelectedOrderAssigned && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCommActionError(null);
+                              clearCommError();
+                              setIsChatOpen(true);
+                              markAsRead();
+                            }}
+                            className="relative px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-brand-gold flex items-center gap-1.5 transition shadow-sm"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>Chat</span>
+                            {unreadCount > 0 && (
+                              <span className="w-4 h-4 rounded-full bg-brand-gold text-zinc-950 text-[10px] font-black flex items-center justify-center">
+                                {unreadCount}
+                              </span>
+                            )}
+                          </button>
 
-                      <button
-                        type="button"
-                        onClick={() => startCall()}
-                        disabled={isCommClosed}
-                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-xs font-bold text-white flex items-center gap-1.5 transition shadow-sm"
-                      >
-                        <Phone className="w-3.5 h-3.5" />
-                        <span>In-App Call</span>
-                      </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              setCommActionError(null);
+                              clearCommError();
+                              const res = await startCall();
+                              if (res?.error) {
+                                setCommActionError(res.error);
+                              }
+                            }}
+                            disabled={isCommClosed}
+                            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-xs font-bold text-white flex items-center gap-1.5 transition shadow-sm"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            <span>In-App Call</span>
+                          </button>
+                        </>
+                      )}
 
                       {getCustomerNavigationUrl(selectedOrder) ? (
                         <a
@@ -912,6 +944,13 @@ export default function RiderPortalPage() {
                   </div>
 
                   {/* Kitchen Pickup & Customer Destination Cards */}
+                  {(commActionError || commError) && isSelectedOrderAssigned && (
+                    <div className="p-3 rounded-xl bg-red-950/70 border border-red-800 text-red-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                      <span>{commActionError || commError}</span>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Kitchen Pickup Card */}
                     <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-4 space-y-2">
@@ -1262,7 +1301,7 @@ export default function RiderPortalPage() {
       )}
 
       {/* In-App Customer Chat Modal */}
-      {selectedOrder && (
+      {selectedOrder && isSelectedOrderAssigned && (
         <OrderChatModal
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
@@ -1274,11 +1313,16 @@ export default function RiderPortalPage() {
           counterpartTyping={counterpartTyping}
           isClosed={isCommClosed}
           channelConnected={channelConnected}
+          commError={commActionError || commError}
           onSendMessage={sendMessage}
           onSendTyping={sendTyping}
-          onStartCall={() => {
+          onStartCall={async () => {
             setIsChatOpen(false);
-            startCall();
+            setCommActionError(null);
+            const res = await startCall();
+            if (res?.error) {
+              setCommActionError(res.error);
+            }
           }}
           onMarkRead={markAsRead}
         />
@@ -1301,7 +1345,7 @@ export default function RiderPortalPage() {
       {incomingCall && (
         <IncomingCallModal
           call={incomingCall}
-          counterpartName={selectedOrder?.customerName || 'Customer'}
+          counterpartName={incomingCall.caller_name || selectedOrder?.customerName || 'Customer'}
           onAccept={(call) => {
             notificationManager.stopIncomingRingtone();
             setActiveCall(call);

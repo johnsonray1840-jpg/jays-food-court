@@ -3,16 +3,15 @@ import { authenticateCommunicationParticipant } from '@/lib/communication/auth';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
- * Escapes unsafe HTML characters to guarantee safe plain text rendering
- * and prevent HTML execution or script injection.
+ * Strips potentially unsafe script/HTML tags while preserving natural punctuation
+ * (apostrophes, quotes, ampersands) for React-escaped plain text rendering.
  */
 function sanitizeContent(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<\/?[^>]+(>|$)/g, '')
+    .replace(/javascript:/gi, '')
+    .trim();
 }
 
 export async function GET(
@@ -62,30 +61,40 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Automatically mark unread messages sent by counterpart as 'read'
-  const unreadFromCounterpart = (messages || []).filter(
-    (m) => m.sender_role !== userRole && m.delivery_status !== 'read'
+  // Transition pending 'sent' messages from counterpart to 'delivered' on fetch.
+  // Explicit 'read' receipts are strictly reserved for POST /messages/read when the chat view is opened.
+  const nowIso = new Date().toISOString();
+  const pendingDeliveryFromCounterpart = (messages || []).filter(
+    (m) => m.sender_role !== userRole && m.delivery_status === 'sent'
   );
 
-  if (unreadFromCounterpart.length > 0) {
-    const unreadIds = unreadFromCounterpart.map((m) => m.id);
+  if (pendingDeliveryFromCounterpart.length > 0) {
+    const deliveredIds = pendingDeliveryFromCounterpart.map((m) => m.id);
     await supabase
       .from('order_messages')
       .update({
-        delivery_status: 'read',
-        read_at: new Date().toISOString()
+        delivery_status: 'delivered',
+        delivered_at: nowIso
       })
-      .in('id', unreadIds);
+      .in('id', deliveredIds);
   }
 
-  const nextCursor = messages && messages.length === limit ? messages[messages.length - 1].created_at : null;
+  const normalizedMessages = (messages || []).map((m) =>
+    m.sender_role !== userRole && m.delivery_status === 'sent'
+      ? { ...m, delivery_status: 'delivered', delivered_at: nowIso }
+      : m
+  );
+
+  const nextCursor = normalizedMessages.length === limit
+    ? normalizedMessages[normalizedMessages.length - 1].created_at
+    : null;
 
   return NextResponse.json({
     orderCode: order.order_code,
     orderStatus: order.status,
     userRole,
     conversationId: conversation.id,
-    messages: messages || [],
+    messages: normalizedMessages,
     nextCursor
   });
 }

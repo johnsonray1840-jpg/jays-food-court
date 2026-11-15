@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCustomerSession, verifySessionToken } from '@/lib/session';
+import { getCustomerSession, verifySessionToken, hasOrderAccess, ORDER_ACCESS_COOKIE_NAME } from '@/lib/session';
 import { getStaffSession } from '@/lib/auth';
+import { normalizeNigerianPhone } from '@/lib/phone';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export interface CommunicationSession {
@@ -88,21 +89,67 @@ export async function authenticateCommunicationParticipant(
   const activeCommunicationStates = ['assigned_to_rider', 'picked_up', 'out_for_delivery', 'dispatched'];
   const isArchived = ['delivered', 'cancelled', 'refunded'].includes(order.status);
 
-  // 5. Check Membership & Role Identification
+  // 5. Check Membership & Explicit Role Resolution (Prevents customer/rider cookie collisions)
+  const roleHeader = req.headers.get('x-communication-role')?.toLowerCase();
+  const roleQuery = new URL(req.url).searchParams.get('role')?.toLowerCase();
+  const requestedRole: 'customer' | 'rider' | null =
+    roleHeader === 'customer' || roleHeader === 'rider'
+      ? roleHeader
+      : roleQuery === 'customer' || roleQuery === 'rider'
+      ? roleQuery
+      : null;
+
+  const isPrivilegedStaff = Boolean(
+    staff && (staff.role === 'owner' || staff.role === 'manager' || staff.role === 'admin')
+  );
+
   const isAssignedRider = Boolean(
     staff &&
-    (staff.role === 'rider' || staff.role === 'owner' || staff.role === 'manager' || staff.role === 'admin') &&
-    (order.assigned_rider_id === staff.id || staff.role !== 'rider')
+    (staff.role === 'rider' || isPrivilegedStaff) &&
+    (order.assigned_rider_id === staff.id || isPrivilegedStaff)
   );
+
+  const orderPhoneNorm = order.phone ? (normalizeNigerianPhone(order.phone) || order.phone) : '';
+  const sessPhoneNorm = customerSession?.phone
+    ? (normalizeNigerianPhone(customerSession.phone) || customerSession.phone)
+    : '';
+  const orderAccessCookie = req.cookies.get(ORDER_ACCESS_COOKIE_NAME)?.value;
 
   const isOrderCustomer = Boolean(
-    customerSession &&
-    ((order.customer_id && customerSession.customerId === order.customer_id) ||
-     (order.phone && customerSession.phone === order.phone))
+    hasOrderAccess(orderAccessCookie, order.order_code) ||
+    (customerSession &&
+      ((order.customer_id && customerSession.customerId === order.customer_id) ||
+       (orderPhoneNorm && sessPhoneNorm && sessPhoneNorm === orderPhoneNorm)))
   );
 
-  // Rejection if not a participant
-  if (!isAssignedRider && !isOrderCustomer) {
+  let resolvedRole: 'customer' | 'rider';
+  if (requestedRole === 'customer') {
+    if (isOrderCustomer || isPrivilegedStaff) {
+      resolvedRole = 'customer';
+    } else {
+      return {
+        errorResponse: NextResponse.json(
+          { error: 'Access denied: Please verify your order phone number to chat or call.' },
+          { status: 403 }
+        )
+      };
+    }
+  } else if (requestedRole === 'rider') {
+    if (isAssignedRider) {
+      resolvedRole = 'rider';
+    } else {
+      return {
+        errorResponse: NextResponse.json(
+          { error: 'Access denied: Only the assigned courier can access rider communication.' },
+          { status: 403 }
+        )
+      };
+    }
+  } else if (isAssignedRider) {
+    resolvedRole = 'rider';
+  } else if (isOrderCustomer) {
+    resolvedRole = 'customer';
+  } else {
     return {
       errorResponse: NextResponse.json(
         { error: 'Access denied: You are not an authorized participant in this order conversation.' },
@@ -194,14 +241,15 @@ export async function authenticateCommunicationParticipant(
   }
 
   // 7. Return Participant Details
-  if (isAssignedRider) {
+  const assignedRider = Array.isArray(order.assigned_rider) ? order.assigned_rider[0] : order.assigned_rider;
+  if (resolvedRole === 'rider') {
     return {
       session: {
         order,
         conversation,
         userRole: 'rider',
-        userId: staff!.id,
-        userName: staff!.fullName || 'Your Courier'
+        userId: String(order.assigned_rider_id || staff!.id),
+        userName: assignedRider?.full_name || staff?.fullName || 'Your Courier'
       }
     };
   }
@@ -211,7 +259,7 @@ export async function authenticateCommunicationParticipant(
       order,
       conversation,
       userRole: 'customer',
-      userId: customerSession ? customerSession.customerId : (order.customer_id || 'customer'),
+      userId: String(order.customer_id || customerSession?.customerId || order.order_code),
       userName: order.customer_name || 'Customer'
     }
   };

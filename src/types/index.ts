@@ -119,6 +119,7 @@ export interface Order {
   deliveryLongitude?: number;
   deliveryLandmark?: string;
   deliveryZoneId?: string;
+  isAuthorizedCustomer?: boolean;
   rider?: {
     name: string;
     phone: string;

@@ -6,7 +6,14 @@ import { createOrderSchema } from '@/lib/validations/order';
 import { calculateServerAuthoritativeOrder } from '@/lib/pricing';
 import { generateOrderReference } from '@/lib/order-ref';
 import { getOrCreateCustomer } from '@/lib/customer';
-import { setCustomerSessionCookie, getCustomerSession } from '@/lib/session';
+import {
+  setCustomerSessionCookie,
+  getCustomerSession,
+  addOrderAccessCookie,
+  ORDER_ACCESS_COOKIE_NAME,
+  verifyOrderAccessToken,
+  signOrderAccessToken
+} from '@/lib/session';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireStaffAuthorization } from '@/lib/auth';
 import { sanitizeCustomerOrderInput } from '@/lib/sanitize';
@@ -691,8 +698,17 @@ export async function POST(req: NextRequest) {
     localOrders.unshift(localOrder);
     writeOrders(localOrders);
 
-    // 10. RETURN SUCCESSFUL ORDER RESPONSE
-    return NextResponse.json(
+    // 10. ISSUE PER-ORDER ACCESS COOKIE & RETURN SUCCESSFUL ORDER RESPONSE
+    let orderAccessToken = '';
+    try {
+      orderAccessToken = await addOrderAccessCookie(orderCode);
+    } catch {
+      const existingVal = req.cookies.get(ORDER_ACCESS_COOKIE_NAME)?.value;
+      const existingCodes = existingVal ? verifyOrderAccessToken(existingVal) : [];
+      orderAccessToken = signOrderAccessToken([...existingCodes, orderCode]);
+    }
+
+    const response = NextResponse.json(
       {
         success: true,
         order: {
@@ -718,6 +734,20 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
+
+    if (orderAccessToken) {
+      response.cookies.set({
+        name: ORDER_ACCESS_COOKIE_NAME,
+        value: orderAccessToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 60
+      });
+    }
+
+    return response;
   } catch (err: any) {
     console.error('Order creation exception:', err);
     return NextResponse.json(

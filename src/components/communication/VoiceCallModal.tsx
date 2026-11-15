@@ -42,7 +42,31 @@ export function VoiceCallModal({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const durationRef = useRef<number>(0);
+  const audioElementsRef = useRef<HTMLAudioElement[]>([]);
+  const manualHangupRef = useRef<boolean>(false);
+  const hasConnectedRef = useRef<boolean>(false);
+  const isSpeakerOnRef = useRef<boolean>(true);
+
+  const onEndCallRef = useRef(onEndCall);
+  const onStatusChangeRef = useRef(onStatusChange);
+  const callRef = useRef(call);
+
+  useEffect(() => {
+    callRef.current = call;
+  }, [call]);
+
+  useEffect(() => {
+    onEndCallRef.current = onEndCall;
+  }, [onEndCall]);
+
+  useEffect(() => {
+    onStatusChangeRef.current = onStatusChange;
+  }, [onStatusChange]);
+
+  useEffect(() => {
+    isSpeakerOnRef.current = isSpeakerOn;
+  }, [isSpeakerOn]);
 
   // Format call duration MM:SS
   const formatTime = (seconds: number) => {
@@ -53,58 +77,150 @@ export function VoiceCallModal({
 
   const isCaller = call?.caller_role === userRole;
 
-  // Cleanup & Hangup handler
-  const handleHangup = useCallback((reason: string = 'normal_hangup') => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
-    const finalDuration = duration;
-    
-    if (roomRef.current) {
-      roomRef.current.disconnect();
-      roomRef.current = null;
-    }
-    if (audioElementRef.current) {
-      audioElementRef.current.remove();
-      audioElementRef.current = null;
-    }
+  const clearAudioElements = useCallback(() => {
+    audioElementsRef.current.forEach((el) => {
+      try {
+        el.pause();
+        el.remove();
+      } catch {
+        // Ignore cleanup errors
+      }
+    });
+    audioElementsRef.current = [];
+  }, []);
 
-    setCallState('ended');
-    if (call) {
-      onEndCall(call.id, finalDuration, reason);
+  // Cleanup & Hangup handler
+  const handleHangup = useCallback(
+    (reason: string = 'normal_hangup') => {
+      manualHangupRef.current = true;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (ringTimeoutRef.current) {
+        clearTimeout(ringTimeoutRef.current);
+        ringTimeoutRef.current = null;
+      }
+
+      const finalDuration = durationRef.current;
+
+      if (roomRef.current) {
+        roomRef.current.disconnect();
+        roomRef.current = null;
+      }
+      clearAudioElements();
+
+      setCallState('ended');
+      if (callRef.current) {
+        onEndCallRef.current(callRef.current.id, finalDuration, reason);
+      }
+    },
+    [clearAudioElements]
+  );
+
+  // Reflect remote callee acceptance for the caller while waiting for WebRTC participant join
+  useEffect(() => {
+    if (!call || hasConnectedRef.current) return;
+    if (isCaller && call.status === 'accepted') {
+      setCallState('connecting');
+      setStatusMessage('Call accepted, connecting audio...');
     }
-  }, [call, duration, onEndCall]);
+  }, [call, isCaller]);
+
+  const callId = call?.id;
+  const callToken = call?.token;
+  const callLivekitUrl = call?.livekit_url;
+  const callOrderCode = call?.order_code;
 
   // Connect to LiveKit Room
   useEffect(() => {
-    if (!call) return;
+    if (!callId || !callOrderCode) return;
 
     let room: Room | null = null;
     let isCleanedUp = false;
 
-    // Caller ringing timeout (cancel after 45s if unanswered)
-    if (isCaller && call.status === 'initiating') {
-      setStatusMessage('Ringing courier phone...');
+    manualHangupRef.current = false;
+    hasConnectedRef.current = false;
+    durationRef.current = 0;
+    startTimeRef.current = null;
+    setDuration(0);
+    setAudioError(null);
+    setIsMuted(false);
+
+    if (isCaller) {
       setCallState('ringing');
-      
+      setStatusMessage(
+        userRole === 'customer' ? 'Ringing courier phone...' : 'Ringing customer phone...'
+      );
+
+      // Caller ringing timeout (cancel after 45s if callee never joins)
       ringTimeoutRef.current = setTimeout(() => {
-        if (callState !== 'connected' && callState !== 'connecting') {
+        if (!hasConnectedRef.current && !manualHangupRef.current && !isCleanedUp) {
           handleHangup('timeout_no_answer');
         }
       }, 45000);
+    } else {
+      setCallState('connecting');
+      setStatusMessage('Connecting audio...');
     }
+
+    const attachAudioTrack = (track: Track) => {
+      if (track.kind !== Track.Kind.Audio) return;
+      const el = track.attach() as HTMLAudioElement;
+      el.autoplay = true;
+      el.muted = !isSpeakerOnRef.current;
+      audioElementsRef.current.push(el);
+      document.body.appendChild(el);
+      el.play().catch(() => {
+        // Browsers may defer autoplay until startAudio() resolves
+      });
+    };
+
+    const markTwoWayConnected = () => {
+      if (isCleanedUp || hasConnectedRef.current) return;
+      hasConnectedRef.current = true;
+      if (ringTimeoutRef.current) {
+        clearTimeout(ringTimeoutRef.current);
+        ringTimeoutRef.current = null;
+      }
+
+      setCallState('connected');
+      setStatusMessage('Connected');
+      startTimeRef.current = Date.now();
+      onStatusChangeRef.current?.('connected');
+
+      if (!timerRef.current) {
+        timerRef.current = setInterval(() => {
+          if (startTimeRef.current) {
+            const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+            durationRef.current = elapsed;
+            setDuration(elapsed);
+          }
+        }, 1000);
+      }
+    };
 
     const connectToRoom = async (token: string, wsUrl: string) => {
       try {
-        setCallState('connecting');
-        setStatusMessage('Establishing encrypted voice channel...');
+        if (!isCaller) {
+          setCallState('connecting');
+          setStatusMessage('Establishing encrypted voice channel...');
+        }
         setAudioError(null);
 
-        // Check for microphone permission
+        if (!navigator?.mediaDevices?.getUserMedia) {
+          throw new Error('Voice calling requires microphone support in a secure (HTTPS) browser.');
+        }
+
+        // Verify microphone permission and release temporary probe stream immediately
         try {
-          await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (permErr: any) {
+          const probeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          probeStream.getTracks().forEach((t) => t.stop());
+        } catch {
           throw new Error('Microphone permission denied. Please allow microphone access to talk.');
         }
+
+        if (isCleanedUp) return;
 
         room = new Room({
           adaptiveStream: true,
@@ -119,99 +235,148 @@ export function VoiceCallModal({
         roomRef.current = room;
 
         room.on(RoomEvent.Connected, async () => {
+          if (isCleanedUp || !room) return;
+
+          // Enable local microphone on join and resume browser audio output
+          try {
+            await room.localParticipant.setMicrophoneEnabled(true);
+          } catch (micErr) {
+            console.warn('[Voice] Unable to enable microphone:', micErr);
+          }
+          await room.startAudio().catch(() => {});
+
+          // Attach any already-published remote audio tracks
+          room.remoteParticipants.forEach((participant) => {
+            participant.audioTrackPublications.forEach((pub) => {
+              if (pub.track) {
+                attachAudioTrack(pub.track);
+              }
+            });
+          });
+
+          // Only transition to two-way 'connected' once counterpart is present (or when callee joins)
+          if (!isCaller || room.remoteParticipants.size > 0) {
+            markTwoWayConnected();
+          } else {
+            setCallState('ringing');
+            setStatusMessage(
+              userRole === 'customer' ? 'Ringing courier phone...' : 'Ringing customer phone...'
+            );
+          }
+        });
+
+        room.on(RoomEvent.ParticipantConnected, () => {
           if (isCleanedUp) return;
-          if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
-          setCallState('connected');
-          setStatusMessage('Connected');
-          startTimeRef.current = Date.now();
-          if (onStatusChange) onStatusChange('connected');
+          markTwoWayConnected();
+        });
 
-          // Start timer
-          timerRef.current = setInterval(() => {
-            if (startTimeRef.current) {
-              setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
-            }
-          }, 1000);
-
-          // Enable microphone on join
-          await room!.localParticipant.setMicrophoneEnabled(true);
+        room.on(RoomEvent.ParticipantDisconnected, () => {
+          if (isCleanedUp || manualHangupRef.current) return;
+          if (hasConnectedRef.current) {
+            handleHangup('normal_hangup');
+          }
         });
 
         room.on(RoomEvent.Reconnecting, () => {
+          if (isCleanedUp) return;
           setCallState('reconnecting');
           setStatusMessage('Reconnecting voice stream...');
         });
 
         room.on(RoomEvent.Reconnected, () => {
-          setCallState('connected');
-          setStatusMessage('Connected');
+          if (isCleanedUp) return;
+          if (hasConnectedRef.current) {
+            setCallState('connected');
+            setStatusMessage('Connected');
+          }
         });
 
         room.on(RoomEvent.Disconnected, () => {
-          if (!isCleanedUp) {
-            handleHangup('connection_error');
+          if (!isCleanedUp && !manualHangupRef.current) {
+            handleHangup(hasConnectedRef.current ? 'normal_hangup' : 'connection_error');
           }
         });
 
         // Remote Audio track subscription
         room.on(RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === Track.Kind.Audio) {
-            const el = track.attach();
-            audioElementRef.current = el;
-            document.body.appendChild(el);
+            attachAudioTrack(track);
           }
         });
 
         room.on(RoomEvent.TrackUnsubscribed, (track) => {
-          track.detach();
+          const detached = track.detach();
+          detached.forEach((el) => {
+            el.remove();
+            audioElementsRef.current = audioElementsRef.current.filter((a) => a !== el);
+          });
         });
 
         await room.connect(wsUrl, token);
-
       } catch (err: any) {
+        if (isCleanedUp) return;
         console.error('[Voice] LiveKit connection error:', err);
         setAudioError(err.message || 'Unable to connect to audio room.');
         setCallState('failed');
       }
     };
 
-    // If caller has token already or callee accepts
-    if (call.token) {
-      const livekitUrl = call.livekit_url || process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://livekit.jaysfoodcourt.com';
-      connectToRoom(call.token, livekitUrl);
+    // Caller receives token from POST /calls; callee fetches token via POST /calls/token upon accept
+    if (callToken) {
+      const livekitUrl = callLivekitUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL || '';
+      if (!livekitUrl) {
+        setAudioError('Voice server URL is not configured.');
+        setCallState('failed');
+      } else {
+        connectToRoom(callToken, livekitUrl);
+      }
     } else {
-      // Callee fetching token on accept
-      fetch(`/api/orders/${encodeURIComponent(call.order_code)}/calls/token`, {
+      fetch(`/api/orders/${encodeURIComponent(callOrderCode)}/calls/token`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callId: call.id })
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Communication-Role': userRole
+        },
+        body: JSON.stringify({ callId })
       })
-        .then((res) => res.json())
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to obtain voice token');
+          }
+          return data;
+        })
         .then((data) => {
-          if (data.token) {
+          if (isCleanedUp) return;
+          if (data.token && data.livekit_url) {
             connectToRoom(data.token, data.livekit_url);
           } else {
-            throw new Error(data.error || 'Failed to obtain voice token');
+            throw new Error(data.error || 'Voice token response incomplete');
           }
         })
         .catch((err) => {
-          setAudioError(err.message);
+          if (isCleanedUp) return;
+          setAudioError(err.message || 'Failed to obtain voice token');
           setCallState('failed');
         });
     }
 
     return () => {
       isCleanedUp = true;
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
-      if (room) room.disconnect();
-      if (audioElementRef.current) {
-        audioElementRef.current.remove();
-        audioElementRef.current = null;
+      manualHangupRef.current = true;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
+      if (ringTimeoutRef.current) {
+        clearTimeout(ringTimeoutRef.current);
+        ringTimeoutRef.current = null;
+      }
+      if (room) room.disconnect();
+      clearAudioElements();
       roomRef.current = null;
     };
-  }, [call?.id, call?.token]);
+  }, [callId, callToken, callLivekitUrl, callOrderCode, isCaller, userRole, handleHangup, clearAudioElements]);
 
   // Toggle Mute
   const toggleMute = async () => {
@@ -225,12 +390,13 @@ export function VoiceCallModal({
     }
   };
 
-  // Toggle Speaker (where setSinkId is supported)
+  // Toggle Speaker output
   const toggleSpeaker = () => {
-    setIsSpeakerOn((prev) => !prev);
-    if (audioElementRef.current) {
-      audioElementRef.current.muted = isSpeakerOn;
-    }
+    const nextSpeaker = !isSpeakerOn;
+    setIsSpeakerOn(nextSpeaker);
+    audioElementsRef.current.forEach((el) => {
+      el.muted = !nextSpeaker;
+    });
   };
 
   if (!call) return null;
@@ -238,7 +404,7 @@ export function VoiceCallModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/85 backdrop-blur-md animate-fade-in">
       <div className="bg-[#17140D] text-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-zinc-800 flex flex-col items-center text-center space-y-6">
-        
+
         {/* Privacy & Order Header */}
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[10px] font-bold text-brand-gold">
           <Shield className="w-3 h-3 text-brand-gold" />
@@ -264,7 +430,7 @@ export function VoiceCallModal({
           <p className="text-xs text-brand-gold font-medium">
             {userRole === 'customer' ? 'Dedicated Courier' : 'Customer'}
           </p>
-          
+
           <div className="pt-2">
             {callState === 'connected' ? (
               <span className="text-base font-mono font-bold text-emerald-400">
@@ -309,9 +475,17 @@ export function VoiceCallModal({
           {/* End Call / Cancel Button */}
           <button
             type="button"
-            onClick={() => handleHangup(callState === 'connected' ? 'normal_hangup' : 'caller_cancelled')}
+            onClick={() =>
+              handleHangup(
+                callState === 'failed'
+                  ? 'connection_error'
+                  : hasConnectedRef.current
+                  ? 'normal_hangup'
+                  : 'caller_cancelled'
+              )
+            }
             className="w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center transition active:scale-90 shadow-lg shadow-rose-900/40"
-            title={callState === 'connected' ? 'End Call' : 'Cancel Call'}
+            title={hasConnectedRef.current ? 'End Call' : 'Cancel Call'}
           >
             <PhoneOff className="w-7 h-7" />
           </button>
@@ -355,7 +529,7 @@ export function IncomingCallModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/85 backdrop-blur-md animate-fade-in">
       <div className="bg-[#17140D] text-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-zinc-800 flex flex-col items-center text-center space-y-6">
-        
+
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[10px] font-bold text-brand-gold">
           <PhoneCall className="w-3 h-3 text-emerald-400 animate-bounce" />
           <span>INCOMING VOICE CALL</span>
