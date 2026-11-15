@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Clock, Flame, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Clock, Flame } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { MenuItem } from '@/types';
 
@@ -14,63 +14,20 @@ interface HeroEditorialProps {
 export function HeroEditorial({ featuredDish }: HeroEditorialProps) {
   const { setActiveModalDish } = useCart();
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const video = videoRef.current;
-
-    if (video && !reducedMotionQuery.matches) {
-      // Ensure muted property is synchronized for reliable browser autoplay after SSR
-      video.muted = true;
-      if (video.paused) {
-        video.play().catch(() => setIsPlaying(false));
-      }
-    }
-
-    const syncReducedMotion = (prefersReducedMotion: boolean) => {
-      const currentVideo = videoRef.current;
-      if (!currentVideo) return;
-      if (prefersReducedMotion) {
-        currentVideo.removeAttribute('autoplay');
-        currentVideo.pause();
-        setIsPlaying(false);
-      }
-    };
-
-    syncReducedMotion(reducedMotionQuery.matches);
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      syncReducedMotion(event.matches);
-    };
-
-    reducedMotionQuery.addEventListener('change', handleChange);
-    return () => {
-      reducedMotionQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
-
-  const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
+
+    video.defaultMuted = true;
+    video.muted = true;
+    video.volume = 0;
+    video.loop = true;
+
     if (video.paused) {
       video.play().catch(() => {});
-      setIsPlaying(true);
-    } else {
-      video.pause();
-      setIsPlaying(false);
     }
-  };
-
-  const toggleMute = () => {
-    const video = videoRef.current;
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
-    if (video) {
-      video.muted = nextMuted;
-    }
-  };
+  }, []);
 
   return (
     <section className="relative overflow-hidden bg-brand-ink border-b border-brand-line">
@@ -84,12 +41,18 @@ export function HeroEditorial({ featuredDish }: HeroEditorialProps) {
           height={1024}
           autoPlay
           loop
-          muted={isMuted}
+          muted
           playsInline
           preload="auto"
           aria-hidden="true"
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
+          onVolumeChange={(e) => {
+            e.currentTarget.muted = true;
+            e.currentTarget.volume = 0;
+          }}
+          onEnded={(e) => {
+            e.currentTarget.currentTime = 0;
+            e.currentTarget.play().catch(() => {});
+          }}
           className="w-full h-full object-cover object-center scale-105 brightness-[0.55] contrast-[1.08] saturate-[1.12] transition-transform duration-1000"
         />
         {/* Luxury Directional Obsidian Scrims */}
@@ -114,6 +77,20 @@ export function HeroEditorial({ featuredDish }: HeroEditorialProps) {
               <span className="text-brand-gold">Delivered Fresh.</span>
             </h1>
 
+            {/* Centered Official Jay's Food Court Logo directly under "Delivered Fresh." */}
+            <div className="flex justify-center py-2">
+              <div className="relative w-56 sm:w-64 lg:w-72 h-28 sm:h-32 lg:h-36 transition-transform duration-300 hover:scale-105">
+                <Image
+                  src="/images/logo.png"
+                  alt="Jay's Food Court LTD Official Logo"
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 224px, (max-width: 1024px) 256px, 288px"
+                  className="object-contain drop-shadow-[0_0_14px_rgba(255,251,239,0.85)]"
+                />
+              </div>
+            </div>
+
             <p className="text-zinc-200 text-sm sm:text-base lg:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
               Freshly cooked firewood party jollof, authentic pounded yam with rich Egusi, Ogbono, and slow-braised meats prepared from scratch at our Agbani culinary hub.
             </p>
@@ -136,7 +113,7 @@ export function HeroEditorial({ featuredDish }: HeroEditorialProps) {
               </Link>
             </div>
 
-            {/* Value Indicators & Ambient Video Controls */}
+            {/* Value Indicators */}
             <div className="pt-5 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-zinc-300 border-t border-white/15">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-brand-gold" />
@@ -145,26 +122,6 @@ export function HeroEditorial({ featuredDish }: HeroEditorialProps) {
               <div className="flex items-center gap-1.5">
                 <Flame className="w-4 h-4 text-brand-gold" />
                 <span>Cooked Fresh on Order</span>
-              </div>
-
-              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 lg:ml-auto">
-                <button
-                  type="button"
-                  onClick={togglePlay}
-                  aria-label={isPlaying ? 'Pause background video' : 'Play background video'}
-                  className="min-w-[28px] min-h-[28px] flex items-center justify-center rounded-full text-brand-cream hover:text-brand-gold hover:bg-white/10 transition focus-visible:outline-2 focus-visible:outline-brand-gold"
-                >
-                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                </button>
-                <span className="w-px h-3.5 bg-white/20" aria-hidden="true" />
-                <button
-                  type="button"
-                  onClick={toggleMute}
-                  aria-label={isMuted ? 'Unmute background video audio' : 'Mute background video audio'}
-                  className="min-w-[28px] min-h-[28px] flex items-center justify-center rounded-full text-brand-cream hover:text-brand-gold hover:bg-white/10 transition focus-visible:outline-2 focus-visible:outline-brand-gold"
-                >
-                  {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                </button>
               </div>
             </div>
           </div>
