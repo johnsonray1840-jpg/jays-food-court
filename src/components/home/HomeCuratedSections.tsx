@@ -54,7 +54,7 @@ export function HomeCuratedSections({ menuItems }: HomeCuratedSectionsProps) {
   return (
     <div className="space-y-16 sm:space-y-24 py-12">
       {/* 1. Carefully Selected Popular Dishes */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="popular" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-brand-line">
           <div>
             <span className="text-[10px] font-black tracking-widest uppercase text-brand-gold">
@@ -82,7 +82,7 @@ export function HomeCuratedSections({ menuItems }: HomeCuratedSectionsProps) {
       </section>
 
       {/* 2. Chef's Recommendations Banner & Spotlight */}
-      <section className="bg-brand-cream/40 py-12 sm:py-16 border-y border-brand-line">
+      <section id="specials" className="scroll-mt-24 bg-brand-cream/40 py-12 sm:py-16 border-y border-brand-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-brand-line/60">
             <div>
@@ -112,7 +112,7 @@ export function HomeCuratedSections({ menuItems }: HomeCuratedSectionsProps) {
       </section>
 
       {/* 3. Compact Menu Preview with Direct 'View Full Menu' Action */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="menu-preview" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-xl mx-auto mb-8 space-y-1">
           <span className="text-[10px] font-black tracking-widest uppercase text-brand-gold">
             Kitchen Catalog
@@ -143,7 +143,7 @@ export function HomeCuratedSections({ menuItems }: HomeCuratedSectionsProps) {
       </section>
 
       {/* 4. Delivery Coverage & Service Information */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="delivery-zones" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl bg-white border border-brand-line p-6 sm:p-10 shadow-xs">
           <div className="max-w-2xl mb-8 space-y-2">
             <span className="text-[10px] font-black tracking-widest uppercase text-brand-gold">
@@ -188,7 +188,7 @@ export function HomeCuratedSections({ menuItems }: HomeCuratedSectionsProps) {
       </section>
 
       {/* 5. How Ordering Works */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="about" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-xl mx-auto mb-10 space-y-1">
           <span className="text-[10px] font-black tracking-widest uppercase text-brand-gold">
             Transparent Workflow
@@ -224,7 +224,7 @@ export function HomeCuratedSections({ menuItems }: HomeCuratedSectionsProps) {
       </section>
 
       {/* 6. Clear 'Track Your Order' Call to Action */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="track" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl bg-brand-ink p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 border border-zinc-800">
           <div className="space-y-3 max-w-xl text-center md:text-left">
             <span className="text-[10px] font-black uppercase tracking-widest text-brand-gold px-3 py-1 rounded-full bg-white/10">
