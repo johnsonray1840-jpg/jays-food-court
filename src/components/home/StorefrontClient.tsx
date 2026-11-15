@@ -416,7 +416,7 @@ export function StorefrontClient({ initialMenu }: StorefrontClientProps) {
       <Footer />
 
       {/* Chowdeck Mobile Bottom Navigation */}
-      <BottomNav cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} showProfile={hasPaidOrder} />
+      <BottomNav cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} />
 
       {/* Floating Cart Button on Mobile */}
       <FloatingMobileBar
