@@ -1,0 +1,343 @@
+{
+  "test-rider-zone-uuid-1234": {
+    "riderId": "test-rider-zone-uuid-1234",
+    "zoneIds": [
+      "zone_agbani_core",
+      "zone_esut_campus"
+    ],
+    "assignedAt": "2026-11-13T09:33:09.378Z",
+    "assignedBy": "Manager Emeka"
+  },
+  "f1111111-1111-1111-1111-111111111111": {
+    "riderId": "f1111111-1111-1111-1111-111111111111",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T09:53:27.599Z",
+    "assignedBy": "Admin Test"
+  },
+  "f2222222-2222-2222-2222-222222222222": {
+    "riderId": "f2222222-2222-2222-2222-222222222222",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T09:53:27.600Z",
+    "assignedBy": "Admin Test"
+  },
+  "test-rider-1": {
+    "riderId": "test-rider-1",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T09:45:58.919Z",
+    "assignedBy": "Admin"
+  },
+  "37ec582f7beebc6300a5d882fb41af6e54da11655df5ffa0b92691e11beb69ec": {
+    "riderId": "37ec582f7beebc6300a5d882fb41af6e54da11655df5ffa0b92691e11beb69ec",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:23:22.034Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "1e633720cae45d495293f43d60d607959487640984f20f80aa9f9bfd0fe4bbf2": {
+    "riderId": "1e633720cae45d495293f43d60d607959487640984f20f80aa9f9bfd0fe4bbf2",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:25:07.107Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "82ca35bce39fe8f71eb782bb1e844a0a8dfa4d2deb818908a4bac9433802e97f": {
+    "riderId": "82ca35bce39fe8f71eb782bb1e844a0a8dfa4d2deb818908a4bac9433802e97f",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:25:10.099Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "fc7bcb9ae587d2be343448a17e36ff8e9ba682526d40baaee5237477735a1211": {
+    "riderId": "fc7bcb9ae587d2be343448a17e36ff8e9ba682526d40baaee5237477735a1211",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:25:11.377Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "54f2a8c6bfba060191d90c38d331d3fcbf06edcf73b0cfaa94850456a1ba15ff": {
+    "riderId": "54f2a8c6bfba060191d90c38d331d3fcbf06edcf73b0cfaa94850456a1ba15ff",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:27:14.909Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "291003e6ede18588642f328a7de8a6e9f28e3a79d8df73eb9b451e38b1a5e6fb": {
+    "riderId": "291003e6ede18588642f328a7de8a6e9f28e3a79d8df73eb9b451e38b1a5e6fb",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:27:16.502Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "fcf883e5c9857494bc1bce595a4e3b835af4c231cf5f37379e38c0842663151f": {
+    "riderId": "fcf883e5c9857494bc1bce595a4e3b835af4c231cf5f37379e38c0842663151f",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:27:17.744Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "75919465e42c2d52185feb08646477c0714cfa59879efa5b3fa70c09c1d75d29": {
+    "riderId": "75919465e42c2d52185feb08646477c0714cfa59879efa5b3fa70c09c1d75d29",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:30:27.450Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "84496bf9adb4e899b5be7aa8d2354f2f81d20a772b09280f12e71cb1ff69bf15": {
+    "riderId": "84496bf9adb4e899b5be7aa8d2354f2f81d20a772b09280f12e71cb1ff69bf15",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:30:29.735Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "b23f199388344977a6ba87edd391957377930cf158a7eb6094fd16153a019fa6": {
+    "riderId": "b23f199388344977a6ba87edd391957377930cf158a7eb6094fd16153a019fa6",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:30:31.057Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "fdfb08c2ca646233ef5ad689cfedca0779b7f4f20b7b025639ed142b80da67ac": {
+    "riderId": "fdfb08c2ca646233ef5ad689cfedca0779b7f4f20b7b025639ed142b80da67ac",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:31:28.869Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "9a5527f39eea236fde6c6ad59c952e111c16fdf45f46ec2d9e78753f7150e73b": {
+    "riderId": "9a5527f39eea236fde6c6ad59c952e111c16fdf45f46ec2d9e78753f7150e73b",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:31:31.509Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "64e805c7bdf76fa136a10386cc743a745a5ce41b18385d4c8a488f26ceb95a09": {
+    "riderId": "64e805c7bdf76fa136a10386cc743a745a5ce41b18385d4c8a488f26ceb95a09",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:31:33.338Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "d09ed331fb593e6d14738d5e1262bb2756e772dec7a85094ac4efcb595d25f1a": {
+    "riderId": "d09ed331fb593e6d14738d5e1262bb2756e772dec7a85094ac4efcb595d25f1a",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:32:33.405Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "a38063cb37e353702692a8f048fa3476201c0a3e745404559e2c2053b8021415": {
+    "riderId": "a38063cb37e353702692a8f048fa3476201c0a3e745404559e2c2053b8021415",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:32:35.683Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "f4bccb4f355cf4b429ef2a3aa1144cdb07377c67c02b133d0f75eaad20ed2127": {
+    "riderId": "f4bccb4f355cf4b429ef2a3aa1144cdb07377c67c02b133d0f75eaad20ed2127",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:32:36.925Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "74ea22c924f6854139d7cd947757fe54337a4f1e927af6ca05e6818d9d5e2376": {
+    "riderId": "74ea22c924f6854139d7cd947757fe54337a4f1e927af6ca05e6818d9d5e2376",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:35:13.251Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "dd54f89190f302644afd3985b6c9f5e714e0b11265372c06728725867b0ee208": {
+    "riderId": "dd54f89190f302644afd3985b6c9f5e714e0b11265372c06728725867b0ee208",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:35:15.001Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "0c44e181b5f4a11c5a129230c906d2e09d4789eb96bf56383a3c02f91ed2ce69": {
+    "riderId": "0c44e181b5f4a11c5a129230c906d2e09d4789eb96bf56383a3c02f91ed2ce69",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:35:16.297Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "01043f271aefe4f5cf2fe5cf0a9d71e599dc235dad8e3cf251107b4a65fb6279": {
+    "riderId": "01043f271aefe4f5cf2fe5cf0a9d71e599dc235dad8e3cf251107b4a65fb6279",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:39:51.433Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "03405874212bee9bb6a11d63c5134bb393367b453b2466d3e85c59ce424aa7d8": {
+    "riderId": "03405874212bee9bb6a11d63c5134bb393367b453b2466d3e85c59ce424aa7d8",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:39:53.140Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "8da5f9bac2e9b55da4a1a77a238c163158356321e3ebdeb89baf77324affcf72": {
+    "riderId": "8da5f9bac2e9b55da4a1a77a238c163158356321e3ebdeb89baf77324affcf72",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:39:54.638Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "3618c885a904ad32bc7f258ad1165b21bbe6ab2cd38aa70667b71e0ef6723ace": {
+    "riderId": "3618c885a904ad32bc7f258ad1165b21bbe6ab2cd38aa70667b71e0ef6723ace",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:43:50.158Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "996187a384e74cb42e80ee000673ff454134a7984bd3cd761b0b030bcdeef57c": {
+    "riderId": "996187a384e74cb42e80ee000673ff454134a7984bd3cd761b0b030bcdeef57c",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:43:51.927Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "f017c12f7aa415671ac05bebcfb80e07830fea31116ebaffbfaf8bbc36e1fcc4": {
+    "riderId": "f017c12f7aa415671ac05bebcfb80e07830fea31116ebaffbfaf8bbc36e1fcc4",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:43:53.714Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "48df47d54c32fac59e7a4750d78d67b6997c8c2c8368620b61dec9e5c7697100": {
+    "riderId": "48df47d54c32fac59e7a4750d78d67b6997c8c2c8368620b61dec9e5c7697100",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:49:14.312Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "30dde1e55e807f20a21701380501924611ec7affab64b7134347d9c8fdcdf10d": {
+    "riderId": "30dde1e55e807f20a21701380501924611ec7affab64b7134347d9c8fdcdf10d",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:49:16.264Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "998521ed41d2f94cca90f43d82fb8de09bb6d58b645ca6ad5432ed9c387b896d": {
+    "riderId": "998521ed41d2f94cca90f43d82fb8de09bb6d58b645ca6ad5432ed9c387b896d",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T10:49:17.943Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "0903a15619b7ec90f6a4a8835553148c3f5b3fa6624e6f38f9b58112789e30fe": {
+    "riderId": "0903a15619b7ec90f6a4a8835553148c3f5b3fa6624e6f38f9b58112789e30fe",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:03:50.088Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "1fa7484c9195a2c51d9c03fd3165593efb70048bb19f972d9a7fc5291d12f6cb": {
+    "riderId": "1fa7484c9195a2c51d9c03fd3165593efb70048bb19f972d9a7fc5291d12f6cb",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:03:51.020Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "57feca9b5b55505a932897ac869294d347f27e1e8859637dbd0f008ba26acc41": {
+    "riderId": "57feca9b5b55505a932897ac869294d347f27e1e8859637dbd0f008ba26acc41",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:03:51.918Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "dc36eee13bc54c840223ef6e24453de453e525ad9808dec87cd68bfbd4da4943": {
+    "riderId": "dc36eee13bc54c840223ef6e24453de453e525ad9808dec87cd68bfbd4da4943",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:12:17.706Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "25d27f1fdd2cb9e4b6160da48dbf51d37ff80a33f4f5e7ddc99d9ce5c8320e18": {
+    "riderId": "25d27f1fdd2cb9e4b6160da48dbf51d37ff80a33f4f5e7ddc99d9ce5c8320e18",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:12:18.635Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "0dc121f5d0cc2ae321a11095c50269dab19831f0b90e49746a79b8a94c7effa1": {
+    "riderId": "0dc121f5d0cc2ae321a11095c50269dab19831f0b90e49746a79b8a94c7effa1",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:12:19.495Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "ddac99a82de101aee1e486136f538b69b35c13f3c5f9f385baa862be1382217f": {
+    "riderId": "ddac99a82de101aee1e486136f538b69b35c13f3c5f9f385baa862be1382217f",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:13:16.182Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "1c8e2503cbee3906d1ec146969eab6b9525ea9a5bbd628d37fda2cd2b538fd9a": {
+    "riderId": "1c8e2503cbee3906d1ec146969eab6b9525ea9a5bbd628d37fda2cd2b538fd9a",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:13:17.180Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "1d37d9de5e5c6032f14857939029bd3522510577d026be9eddeb7e12a00c4762": {
+    "riderId": "1d37d9de5e5c6032f14857939029bd3522510577d026be9eddeb7e12a00c4762",
+    "zoneIds": [
+      "zone_agbani_core"
+    ],
+    "assignedAt": "2026-11-13T19:13:17.988Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "1b1d9ed6-4e5d-4375-bfae-637943720121": {
+    "riderId": "1b1d9ed6-4e5d-4375-bfae-637943720121",
+    "zoneIds": [],
+    "assignedAt": "2026-11-14T03:13:54.768Z",
+    "assignedBy": "Jay (Owner)"
+  },
+  "cbf4106e-8323-4008-9147-da887ddc9ee8": {
+    "riderId": "cbf4106e-8323-4008-9147-da887ddc9ee8",
+    "zoneIds": [],
+    "assignedAt": "2026-11-14T03:17:19.513Z",
+    "assignedBy": "Jay (Owner)"
+  }
+}

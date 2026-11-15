@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /staff
+Disallow: /kitchen
+Disallow: /owner
+Disallow: /rider
+Disallow: /profile
+Disallow: /auth/
+
+Sitemap: https://jaysfoodcourt.com/sitemap.xml

@@ -1,0 +1,728 @@
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import { createOrderSchema } from '@/lib/validations/order';
+import { calculateServerAuthoritativeOrder } from '@/lib/pricing';
+import { generateOrderReference } from '@/lib/order-ref';
+import { getOrCreateCustomer } from '@/lib/customer';
+import { setCustomerSessionCookie, getCustomerSession } from '@/lib/session';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { requireStaffAuthorization } from '@/lib/auth';
+import { sanitizeCustomerOrderInput } from '@/lib/sanitize';
+import { isCoordinateWithinEnugu, validateLocationServiceability } from '@/lib/enugu-geocoding';
+import { calculateDynamicPrepEstimate } from '@/lib/kitchen-prep-time';
+import { Order, OrderStatus } from '@/types';
+
+const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.json');
+
+interface StoredLocalOrder extends Order {
+  idempotencyKey?: string;
+  orderNumber?: string;
+  customerId?: string;
+  deliveryCoordinates?: { latitude: number; longitude: number };
+  deliveryZoneId?: string;
+  landmark?: string;
+  deliveryOtp?: string;
+  deliveryOtpHash?: string;
+  otpAttempts?: number;
+}
+
+function readOrders(): StoredLocalOrder[] {
+  try {
+    if (!fs.existsSync(ORDERS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8'));
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeOrders(orders: StoredLocalOrder[]) {
+  try {
+    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error writing orders file:', err);
+  }
+}
+
+export async function GET(req: NextRequest) {
+  // STAGE 6: RESTRICT COMPLETE ORDERS DATABASE TO AUTHORIZED STAFF ONLY
+  // Customers must NEVER be able to retrieve the complete restaurant order database.
+  const { staff, errorResponse } = await requireStaffAuthorization(req, [
+    'owner',
+    'admin',
+    'manager',
+    'kitchen_staff',
+    'rider'
+  ]);
+
+  if (errorResponse) {
+    return NextResponse.json(
+      {
+        error: 'Access denied: Complete restaurant order database is restricted to authorized staff. Customers can track individual orders via /api/orders/[id].',
+        code: 'FORBIDDEN'
+      },
+      { status: 403 }
+    );
+  }
+
+  const isRiderRole = staff?.role === 'rider';
+  const supabase = getSupabaseAdminClient();
+
+  if (supabase) {
+    try {
+      let query = supabase
+        .from('orders')
+        .select(`
+          id,
+          order_code,
+          customer_name,
+          phone,
+          delivery_address,
+          delivery_latitude,
+          delivery_longitude,
+          delivery_landmark,
+          delivery_zone_id,
+          delivery_details,
+          status,
+          subtotal,
+          discount_amount,
+          delivery_fee,
+          total_amount,
+          payment_method,
+          estimated_delivery_time,
+          assigned_rider_id,
+          created_at,
+          order_items (
+            id,
+            item_name,
+            unit_price,
+            quantity,
+            total_price,
+            customizations,
+            notes
+          ),
+          assigned_rider:riders (
+            full_name,
+            phone,
+            rating
+          )
+        `);
+
+      // Restrict rider visibility to actionable ready orders or orders assigned to them
+      if (isRiderRole && staff) {
+        query = query
+          .or(`assigned_rider_id.eq.${staff.id},and(status.eq.ready_for_pickup,assigned_rider_id.is.null)`);
+      } else if (staff?.role === 'kitchen_staff') {
+        // Kitchen staff should only see confirmed/paid orders actively being prepared, not unpaid carts
+        query = query.neq('status', 'pending_payment');
+      }
+
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        if (data.length === 0 && isRiderRole) {
+          return NextResponse.json([]);
+        }
+        if (data.length > 0) {
+          const mappedOrders: Order[] = data.map((o: any) => {
+            const assignedRider: any = Array.isArray(o.assigned_rider)
+              ? o.assigned_rider[0]
+              : o.assigned_rider;
+
+            const isAssignedToThisRider = o.assigned_rider_id && staff?.id && o.assigned_rider_id === staff.id;
+            const isUnassignedOffer = o.status === 'ready_for_pickup' && !o.assigned_rider_id;
+
+            // Privacy rules: Unassigned offers mask sensitive customer personal phone number
+            const displayPhone = (isRiderRole && isUnassignedOffer) ? 'Hidden until claimed' : o.phone;
+            const displayCustomerName = (isRiderRole && isUnassignedOffer) ? 'Jay\'s Food Court Customer' : o.customer_name;
+
+            return {
+              id: o.order_code,
+              createdAt: o.created_at,
+              customerName: displayCustomerName,
+              phone: displayPhone,
+              address: o.delivery_address,
+              deliveryLatitude: o.delivery_latitude ? Number(o.delivery_latitude) : (o.delivery_details?.latitude ? Number(o.delivery_details.latitude) : undefined),
+              deliveryLongitude: o.delivery_longitude ? Number(o.delivery_longitude) : (o.delivery_details?.longitude ? Number(o.delivery_details.longitude) : undefined),
+              deliveryLandmark: o.delivery_landmark || o.delivery_details?.landmark,
+              deliveryZoneId: o.delivery_zone_id,
+              deliveryDetails: o.delivery_details,
+              items: (o.order_items || []).map((oi: any) => {
+                const cust = oi.customizations || {};
+                return {
+                  key: oi.id,
+                  id: 1,
+                  name: oi.item_name,
+                  img: 'egusi',
+                  unit: Number(oi.unit_price),
+                  qty: oi.quantity,
+                  swallow: cust.swallow || null,
+                  extras: (cust.options || []).map((opt: any) => opt.name) || [],
+                  note: oi.notes || ''
+                };
+              }),
+              subtotal: Number(o.subtotal),
+              discount: Number(o.discount_amount),
+              deliveryFee: Number(o.delivery_fee),
+              total: Number(o.total_amount),
+              paymentMode: o.payment_method === 'cash_on_delivery' ? 'cod' : 'transfer',
+              status: o.status as OrderStatus,
+              eta: o.estimated_delivery_time || '18 - 25 Mins',
+              rider: assignedRider
+                ? {
+                    name: assignedRider.full_name,
+                    phone: assignedRider.phone,
+                    rating: assignedRider.rating ? `${assignedRider.rating} ★` : ''
+                  }
+                : null
+            };
+          });
+
+          return NextResponse.json(mappedOrders);
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase orders fetch error, falling back to local file', err);
+    }
+  }
+
+  // Riders must never receive unfiltered local fallback order database
+  if (isRiderRole) {
+    return NextResponse.json([]);
+  }
+
+  const allOrders = readOrders();
+  // Kitchen staff must only receive eligible confirmed and paid orders, never pending_payment carts
+  const filteredOrders = staff?.role === 'kitchen_staff'
+    ? allOrders.filter((o) => o.status !== 'pending_payment')
+    : allOrders;
+
+  return NextResponse.json(filteredOrders);
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    // STAGE 6: SANITIZE ALL CUSTOMER-GENERATED CONTENT (XSS / SCRIPT STRIPPING)
+    const rawBody = sanitizeCustomerOrderInput(await req.json());
+
+    // 1. EXTRACT IDEMPOTENCY KEY (From Header or Payload - evaluated only AFTER customer identity resolution)
+    const idempotencyKey = (
+      req.headers.get('Idempotency-Key') ||
+      rawBody.idempotencyKey ||
+      ''
+    ).trim();
+
+    // 2. STRICT SCHEMA VALIDATION
+    const validationResult = createOrderSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      const errorDetails = validationResult.error.issues.map((i) => i.message).join('. ');
+      return NextResponse.json({ error: errorDetails }, { status: 400 });
+    }
+
+    const data = validationResult.data;
+
+    // Strict Enugu Geolocation & Service Boundary Enforcement
+    if (data.deliveryCoordinates) {
+      const serviceValidation = validateLocationServiceability(data.deliveryCoordinates, data.deliveryZoneId);
+      if (!serviceValidation.isServiceable) {
+        return NextResponse.json(
+          { error: serviceValidation.unserviceableReason || 'Selected destination is outside our delivery service area.' },
+          { status: 400 }
+        );
+      }
+    } else if (data.deliveryZoneId) {
+      const serviceValidation = validateLocationServiceability(null, data.deliveryZoneId);
+      if (!serviceValidation.isServiceable) {
+        return NextResponse.json(
+          { error: serviceValidation.unserviceableReason || 'Delivery to this zone is currently unavailable.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. SERVER-AUTHORITATIVE PRICING ENGINE
+    // Never trust prices or totals sent by the browser
+    let pricing;
+    try {
+      pricing = await calculateServerAuthoritativeOrder(
+        data.items,
+        data.promoCode,
+        data.deliveryZoneId || data.address
+      );
+    } catch (pricingErr: any) {
+      return NextResponse.json(
+        { error: pricingErr.message || 'Pricing calculation failed.' },
+        { status: 400 }
+      );
+    }
+
+    // 5. CUSTOMER IDENTITY & ADDRESS HANDLING
+    let existingSession = null;
+    const custCookieVal = req.cookies.get('jfc_customer_session')?.value;
+    if (custCookieVal) {
+      const { verifySessionToken } = await import('@/lib/session');
+      existingSession = verifySessionToken(custCookieVal);
+    } else {
+      try {
+        existingSession = await getCustomerSession();
+      } catch {}
+    }
+    let customer: { id: string; fullName: string; phone: string; email?: string | null };
+    let fullDeliveryAddress = '';
+    let shouldSetSessionCookie = false;
+
+    if (data.addressId) {
+      // Look up existing address
+      const supabase = getSupabaseAdminClient();
+      let foundAddr: any = null;
+      if (supabase) {
+        const { data: addr } = await supabase
+          .from('customer_addresses')
+          .select('*, customer:customers(*)')
+          .eq('id', data.addressId)
+          .maybeSingle();
+        foundAddr = addr;
+      }
+
+      if (foundAddr && foundAddr.customer) {
+        // Enforce ownership: If requesting with an addressId, customer must be authenticated as that customer!
+        if (!existingSession || existingSession.customerId !== foundAddr.customer.id) {
+          return NextResponse.json({ error: 'Access denied: You must be logged in to use saved addresses.' }, { status: 403 });
+        }
+
+        customer = {
+          id: foundAddr.customer.id,
+          fullName: foundAddr.customer.full_name,
+          phone: foundAddr.customer.phone,
+          email: foundAddr.customer.email
+        };
+        fullDeliveryAddress = [foundAddr.street_address, foundAddr.landmark, 'Agbani, Enugu']
+          .filter(Boolean)
+          .join(', ');
+      } else {
+        return NextResponse.json({ error: 'Referenced address ID not found.' }, { status: 400 });
+      }
+    } else {
+      // Guest Checkout: normalize phone and establish customer profile
+      const custRecord = await getOrCreateCustomer({
+        fullName: data.customerName || 'Guest Customer',
+        phone: data.phone || '',
+        email: data.email || undefined,
+        streetAddress: data.address || 'Agbani',
+        landmark: data.landmark || undefined,
+        authenticatedCustomerId: existingSession?.customerId
+      });
+
+      if (!custRecord?.customer) {
+        return NextResponse.json({ error: 'Failed to establish customer record.' }, { status: 500 });
+      }
+
+      customer = custRecord.customer;
+      fullDeliveryAddress = [
+        data.address,
+        data.landmark ? `(Near ${data.landmark})` : null,
+        data.deliveryZoneId ? `[Zone: ${data.deliveryZoneId}]` : null,
+        'Enugu State'
+      ]
+        .filter(Boolean)
+        .join(', ');
+
+      // STRICT SESSION ISOLATION:
+      // Only issue a session cookie for a brand-new customer account!
+      // Submitting an existing customer's phone number alone NEVER grants a session cookie for their account.
+      shouldSetSessionCookie = custRecord.isNewCustomer === true;
+    }
+
+    // 6. CUSTOMER-SCOPED IDEMPOTENCY CHECK (Never allow one customer to probe/replay another's key)
+    if (idempotencyKey) {
+      const supabaseClientForIdemp = getSupabaseAdminClient();
+      if (supabaseClientForIdemp && !customer.id.startsWith('cust-')) {
+        const { data: existingDbOrder } = await supabaseClientForIdemp
+          .from('orders')
+          .select('order_code, customer_id, subtotal, discount_amount, delivery_fee, total_amount, status')
+          .eq('customer_id', customer.id)
+          .eq('idempotency_key', idempotencyKey)
+          .maybeSingle();
+
+        if (existingDbOrder) {
+          if (existingSession && existingSession.customerId !== existingDbOrder.customer_id) {
+            return NextResponse.json(
+              { error: 'Access denied: Idempotency key belongs to another customer session.' },
+              { status: 403 }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              success: true,
+              isReplay: true,
+              order: {
+                id: existingDbOrder.order_code,
+                order_number: existingDbOrder.order_code,
+                subtotal: Number(existingDbOrder.subtotal),
+                discount: Number(existingDbOrder.discount_amount),
+                deliveryFee: Number(existingDbOrder.delivery_fee),
+                total: Number(existingDbOrder.total_amount),
+                status: existingDbOrder.status
+              }
+            },
+            { status: 200 }
+          );
+        }
+      } else {
+        const localOrders = readOrders();
+        const existingLocal = localOrders.find(
+          (o) =>
+            o.idempotencyKey === idempotencyKey &&
+            (o.customerId === customer.id || o.phone === customer.phone)
+        );
+        if (existingLocal) {
+          if (existingSession && existingLocal.customerId && existingSession.customerId !== existingLocal.customerId) {
+            return NextResponse.json(
+              { error: 'Access denied: Idempotency key belongs to another customer session.' },
+              { status: 403 }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              success: true,
+              isReplay: true,
+              order: {
+                id: existingLocal.id,
+                order_number: existingLocal.id,
+                subtotal: existingLocal.subtotal,
+                discount: existingLocal.discount,
+                deliveryFee: existingLocal.deliveryFee,
+                total: existingLocal.total,
+                status: existingLocal.status
+              }
+            },
+            { status: 200 }
+          );
+        }
+      }
+    }
+
+    // 7. ISSUE SECURE HTTP-ONLY SESSION COOKIE (Only when verified)
+    if (shouldSetSessionCookie) {
+      try {
+        await setCustomerSessionCookie(customer.id, customer.phone);
+      } catch {
+        // Fallback when called directly in programmatic testing outside request store
+      }
+    }
+
+    // 7. GENERATE UNIQUE, NON-PREDICTABLE ORDER REFERENCE & SECURE 6-DIGIT DELIVERY VERIFICATION CODE
+    const orderCode = generateOrderReference(); // e.g. "JFC-7KM-92X"
+    const orderUuid = crypto.randomUUID();
+    // Cryptographically secure 6-digit random code
+    const deliveryOtp = String(crypto.randomInt(100000, 999999));
+    const deliveryOtpHash = crypto.createHash('sha256').update(deliveryOtp).digest('hex');
+    const dbPaymentMethod = 'card'; // Phase 4: All orders use online gateway (Card/Transfer/USSD)
+
+    // 8. ATOMIC DATABASE TRANSACTION IN SUPABASE
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      try {
+        const formattedDbItems = pricing.items.map((item) => ({
+          menu_item_id: !item.menuItemId.startsWith('m000') ? item.menuItemId : null,
+          item_name: item.itemName,
+          unit_price: item.unitPrice,
+          quantity: item.quantity,
+          total_price: item.lineTotal,
+          customizations: item.customizations,
+          notes: item.notes || null
+        }));
+
+        // Try single atomic RPC transaction
+        const { data: rpcData, error: rpcError } = await supabase.rpc('create_order_atomic', {
+          p_idempotency_key: idempotencyKey || null,
+          p_order_code: orderCode,
+          p_customer_id: customer.id.startsWith('cust-') ? null : customer.id,
+          p_customer_name: customer.fullName,
+          p_phone: customer.phone,
+          p_delivery_address: fullDeliveryAddress,
+          p_subtotal: pricing.subtotal,
+          p_discount_amount: pricing.discountAmount,
+          p_delivery_fee: pricing.deliveryFee,
+          p_total_amount: pricing.totalAmount,
+          p_payment_method: dbPaymentMethod,
+          p_special_instructions: data.deliveryInstructions || null,
+          p_assigned_rider_id: null,
+          p_items: formattedDbItems
+        });
+
+        if (!rpcError && rpcData) {
+          // Persist the cryptographically generated OTP and hash into the new order
+          await supabase
+            .from('orders')
+            .update({
+              delivery_otp: deliveryOtp,
+              delivery_otp_hash: deliveryOtpHash
+            })
+            .eq('order_code', orderCode);
+
+          if (rpcData.is_replay) {
+            return NextResponse.json(
+              {
+                success: true,
+                isReplay: true,
+                order: {
+                  id: rpcData.order_code,
+                  order_number: rpcData.order_code,
+                  subtotal: Number(rpcData.subtotal),
+                  discount: Number(rpcData.discount_amount),
+                  deliveryFee: Number(rpcData.delivery_fee),
+                  total: Number(rpcData.total_amount),
+                  status: rpcData.status
+                }
+              },
+              { status: 200 }
+            );
+          }
+        }
+
+        if (rpcError) {
+          const isMissingRpc =
+            rpcError.code === 'PGRST202' ||
+            rpcError.code === '42883' ||
+            String(rpcError.message || '').includes('Could not find the function');
+
+          if (!isMissingRpc) {
+            if (
+              idempotencyKey &&
+              !customer.id.startsWith('cust-') &&
+              (rpcError.code === '23505' || String(rpcError.message || '').includes('idx_orders_idempotency_key'))
+            ) {
+              const { data: winningOrder } = await supabase
+                .from('orders')
+                .select('order_code, customer_id, subtotal, discount_amount, delivery_fee, total_amount, status')
+                .eq('customer_id', customer.id)
+                .eq('idempotency_key', idempotencyKey)
+                .maybeSingle();
+
+              if (winningOrder) {
+                return NextResponse.json(
+                  {
+                    success: true,
+                    isReplay: true,
+                    order: {
+                      id: winningOrder.order_code,
+                      order_number: winningOrder.order_code,
+                      subtotal: Number(winningOrder.subtotal),
+                      discount: Number(winningOrder.discount_amount),
+                      deliveryFee: Number(winningOrder.delivery_fee),
+                      total: Number(winningOrder.total_amount),
+                      status: winningOrder.status
+                    }
+                  },
+                  { status: 200 }
+                );
+              }
+            }
+            throw new Error(`Order RPC creation failed: ${rpcError.message}`);
+          }
+
+          // Fallback transactional client sequence (with explicit rollback on any downstream failure)
+          const { error: insErr } = await supabase.from('orders').insert({
+            id: orderUuid,
+            idempotency_key: idempotencyKey || null,
+            order_code: orderCode,
+            customer_id: customer.id.startsWith('cust-') ? null : customer.id,
+            customer_name: customer.fullName,
+            phone: customer.phone,
+            delivery_address: fullDeliveryAddress,
+            status: 'pending_payment',
+            subtotal: pricing.subtotal,
+            discount_amount: pricing.discountAmount,
+            delivery_fee: pricing.deliveryFee,
+            total_amount: pricing.totalAmount,
+            payment_method: dbPaymentMethod,
+            payment_status: 'pending',
+            estimated_delivery_time: '18 - 25 Mins',
+            assigned_rider_id: null,
+            special_instructions: data.deliveryInstructions || null,
+            delivery_otp: deliveryOtp,
+            delivery_otp_hash: deliveryOtpHash
+          });
+
+          if (insErr) {
+            // Handle concurrent idempotency race cleanly by returning the winning idempotent order
+            if (
+              idempotencyKey &&
+              !customer.id.startsWith('cust-') &&
+              (insErr.code === '23505' || String(insErr.message || '').includes('idx_orders_idempotency_key'))
+            ) {
+              const { data: winningOrder } = await supabase
+                .from('orders')
+                .select('order_code, customer_id, subtotal, discount_amount, delivery_fee, total_amount, status')
+                .eq('customer_id', customer.id)
+                .eq('idempotency_key', idempotencyKey)
+                .maybeSingle();
+
+              if (winningOrder) {
+                return NextResponse.json(
+                  {
+                    success: true,
+                    isReplay: true,
+                    order: {
+                      id: winningOrder.order_code,
+                      order_number: winningOrder.order_code,
+                      subtotal: Number(winningOrder.subtotal),
+                      discount: Number(winningOrder.discount_amount),
+                      deliveryFee: Number(winningOrder.delivery_fee),
+                      total: Number(winningOrder.total_amount),
+                      status: winningOrder.status
+                    }
+                  },
+                  { status: 200 }
+                );
+              }
+            }
+            throw new Error(`Order header creation failed: ${insErr.message}`);
+          }
+
+          const orderItemsPayload = formattedDbItems.map((fi) => ({
+            id: crypto.randomUUID(),
+            order_id: orderUuid,
+            menu_item_id: fi.menu_item_id,
+            item_name: fi.item_name,
+            unit_price: fi.unit_price,
+            quantity: fi.quantity,
+            total_price: fi.total_price,
+            customizations: fi.customizations,
+            notes: fi.notes
+          }));
+
+          const { error: itemsErr } = await supabase.from('order_items').insert(orderItemsPayload);
+          if (itemsErr) {
+            // Rollback order header so zero orphaned orders exist
+            await supabase.from('orders').delete().eq('id', orderUuid);
+            throw new Error(`Order items creation failed (rolled back): ${itemsErr.message}`);
+          }
+
+          const { error: histErr } = await supabase.from('order_status_history').insert({
+            id: crypto.randomUUID(),
+            order_id: orderUuid,
+            status: 'confirmed',
+            from_status: null,
+            to_status: 'confirmed',
+            actor_type: 'customer',
+            actor_id: customer.id,
+            notes: 'Order placed via Web Storefront (Server-Authoritative)'
+          });
+
+          if (histErr) {
+            await supabase.from('orders').delete().eq('id', orderUuid);
+            throw new Error(`Order status history creation failed (rolled back): ${histErr.message}`);
+          }
+        }
+      } catch (dbErr: any) {
+        console.error('Supabase ordering transaction failed:', dbErr);
+        return NextResponse.json(
+          { error: 'Unable to record order in database. Please try again.' },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 8. CALCULATE SENSIBLE DYNAMIC KITCHEN PREPARATION ESTIMATE
+    const localOrdersBefore = readOrders();
+    const activeKitchenOrdersCount = localOrdersBefore.filter((o) =>
+      ['confirmed', 'accepted', 'cooking', 'preparing'].includes(o.status)
+    ).length;
+
+    const prepCalculation = calculateDynamicPrepEstimate(
+      pricing.items.map((pi) => ({
+        id: pi.legacyId || 1,
+        name: pi.itemName,
+        qty: pi.quantity
+      })),
+      activeKitchenOrdersCount,
+      'normal'
+    );
+
+    // 9. MIRROR TO LOCAL PERSISTENCE FOR OFFLINE RESILIENCE
+    const localOrder: StoredLocalOrder = {
+      id: orderCode,
+      customerId: customer.id,
+      idempotencyKey: idempotencyKey || undefined,
+      createdAt: new Date().toISOString(),
+      customerName: customer.fullName,
+      phone: customer.phone,
+      address: fullDeliveryAddress,
+      items: pricing.items.map((item, idx) => ({
+        key: `item-${idx}-${item.legacyId || 1}`,
+        id: item.legacyId || 1,
+        name: item.itemName,
+        img: 'egusi',
+        unit: item.unitPrice,
+        qty: item.quantity,
+        swallow: (item.customizations.swallow as any) || null,
+        extras: item.customizations.options.map((o) => o.name),
+        proteins: item.customizations.proteins || [],
+        swallows: item.customizations.swallows || [],
+        addons: item.customizations.addons || [],
+        note: item.notes
+      })),
+      subtotal: pricing.subtotal,
+      discount: pricing.discountAmount,
+      deliveryFee: pricing.deliveryFee,
+      total: pricing.totalAmount,
+      paymentMode: data.paymentMode,
+      deliveryCoordinates: data.deliveryCoordinates || undefined,
+      deliveryZoneId: data.deliveryZoneId || undefined,
+      landmark: data.landmark || undefined,
+      deliveryOtp,
+      deliveryOtpHash,
+      otpAttempts: 0,
+      status: 'confirmed',
+      eta: pricing.estimatedDeliveryTime || '18 - 25 Mins',
+      estimatedPrepMinutes: prepCalculation.totalEstimatedMinutes,
+      estimatedReadyTime: prepCalculation.estimatedReadyTime,
+      rider: null
+    };
+
+    const localOrders = readOrders();
+    localOrders.unshift(localOrder);
+    writeOrders(localOrders);
+
+    // 10. RETURN SUCCESSFUL ORDER RESPONSE
+    return NextResponse.json(
+      {
+        success: true,
+        order: {
+          id: orderCode,
+          order_number: orderCode,
+          reference: orderCode,
+          uuid: orderUuid,
+          subtotal: pricing.subtotal,
+          discount: pricing.discountAmount,
+          deliveryFee: pricing.deliveryFee,
+          total: pricing.totalAmount,
+          status: 'confirmed',
+          eta: '18 - 25 Mins',
+          estimatedPrepMinutes: prepCalculation.totalEstimatedMinutes,
+          estimatedReadyTime: prepCalculation.estimatedReadyTime,
+          deliveryOtp,
+          customer: {
+            id: customer.id,
+            name: customer.fullName,
+            phone: customer.phone
+          }
+        }
+      },
+      { status: 201 }
+    );
+  } catch (err: any) {
+    console.error('Order creation exception:', err);
+    return NextResponse.json(
+      { error: 'An unexpected error occurred while processing your order.' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,133 @@
+import crypto from 'crypto';
+import { cookies } from 'next/headers';
+
+const SESSION_COOKIE_NAME = 'jfc_customer_session';
+
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.trim().length < 16) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SECURITY CONFIGURATION ERROR: SESSION_SECRET must be configured.');
+    }
+    return 'jays-food-court-secure-session-key-2026';
+  }
+  return secret;
+}
+
+interface CustomerSessionData {
+  customerId: string;
+  phone: string;
+  createdAt: number;
+}
+
+/**
+ * Creates a cryptographically signed session token: dataBase64.signature
+ */
+export function signSessionToken(data: CustomerSessionData): string {
+  const secret = getSessionSecret();
+  const safeData: CustomerSessionData = {
+    customerId: data.customerId,
+    phone: data.phone,
+    createdAt: typeof data.createdAt === 'number' && !isNaN(data.createdAt) ? data.createdAt : Date.now()
+  };
+  const payload = Buffer.from(JSON.stringify(safeData)).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('base64url');
+  return `${payload}.${signature}`;
+}
+
+/**
+ * Verifies and decodes a signed session token. Returns null if invalid or tampered with.
+ */
+export function verifySessionToken(token: string): CustomerSessionData | null {
+  try {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 2) return null;
+
+    const [payload, signature] = parts;
+    const secret = getSessionSecret();
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('base64url');
+
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expectedSignature);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return null;
+    }
+
+    const data: CustomerSessionData = JSON.parse(
+      Buffer.from(payload, 'base64url').toString('utf8')
+    );
+
+    // Strict expiration check: createdAt must be a valid number and within 90 days
+    if (!data.createdAt || typeof data.createdAt !== 'number' || isNaN(data.createdAt)) {
+      return null;
+    }
+
+    const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+    if (Date.now() - data.createdAt > MAX_AGE_MS || data.createdAt > Date.now() + 60000) {
+      return null;
+    }
+
+    if (!data.customerId || !data.phone) {
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Sets the HTTP-only, Secure, SameSite customer session cookie.
+ */
+export async function setCustomerSessionCookie(customerId: string, phone: string) {
+  const token = signSessionToken({
+    customerId,
+    phone,
+    createdAt: Date.now()
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.set({
+    name: SESSION_COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 60 // 60 days
+  });
+}
+
+/**
+ * Reads and verifies the customer session from HTTP cookies.
+ */
+export async function getCustomerSession(): Promise<CustomerSessionData | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  if (!token) return null;
+  return verifySessionToken(token);
+}
+
+/**
+ * Clears the customer session cookie.
+ */
+export async function clearCustomerSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.set({
+    name: SESSION_COOKIE_NAME,
+    value: '',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0
+  });
+}

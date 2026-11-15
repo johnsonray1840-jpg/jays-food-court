@@ -1,0 +1,80 @@
+export type Category = 'All' | 'Soups & Swallows' | 'Rice' | 'Yam & Egg' | 'Drinks';
+
+export type SwallowOption = 'Pounded Yam' | 'Yellow Garri (Eba)' | 'Semovita';
+
+export interface ExtraProtein {
+  name: string;
+  price: number;
+}
+
+export interface MenuItem {
+  id: number;
+  name: string;
+  desc: string;
+  price: number;
+  cat: Category;
+  img: string;
+  rating: string;
+  swallow: boolean;
+  available: boolean;
+}
+
+export interface CartLineItem {
+  key: string;
+  id: number;
+  name: string;
+  img: string;
+  unit: number;
+  qty: number;
+  swallow?: SwallowOption | null;
+  extras: string[];
+  note?: string;
+}
+
+export type OrderStatus =
+  | 'pending_payment'
+  | 'confirmed'
+  | 'accepted'
+  | 'preparing'
+  | 'ready_for_pickup'
+  | 'assigned_to_rider'
+  | 'picked_up'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'cancelled'
+  | 'refunded'
+  | 'cooking' // Legacy alias for preparing
+  | 'dispatched'; // Legacy alias for out_for_delivery
+
+export interface OrderStatusHistoryEntry {
+  id: string;
+  orderId: string;
+  fromStatus?: OrderStatus | null;
+  toStatus: OrderStatus;
+  actorType: 'customer' | 'kitchen_staff' | 'rider' | 'manager' | 'admin' | 'system';
+  actorId?: string | null;
+  riderId?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface Order {
+  id: string;
+  createdAt: string;
+  customerName: string;
+  phone: string;
+  address: string;
+  items: CartLineItem[];
+  subtotal: number;
+  discount: number;
+  deliveryFee: number;
+  total: number;
+  paymentMode: 'transfer' | 'cod';
+  status: OrderStatus;
+  eta: string;
+  rider?: {
+    name: string;
+    phone: string;
+    rating?: string;
+  } | null;
+}

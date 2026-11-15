@@ -1,0 +1,474 @@
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+import { z } from 'zod';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { getCustomerSession } from '@/lib/session';
+import { getStaffSession, StaffRole } from '@/lib/auth';
+import {
+  OrderStatus,
+  OrderActorRole,
+  validateOrderTransition,
+  getEstimatedDeliveryTimeForStatus
+} from '@/lib/order-state-machine';
+import { Order } from '@/types';
+
+const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.json');
+const HISTORY_FILE = path.join(process.cwd(), 'data', 'order_status_history.json');
+
+const statusTransitionSchema = z.object({
+  status: z.enum([
+    'pending_payment',
+    'confirmed',
+    'accepted',
+    'preparing',
+    'ready_for_pickup',
+    'assigned_to_rider',
+    'picked_up',
+    'out_for_delivery',
+    'delivered',
+    'cancelled',
+    'refunded',
+    // Legacy support
+    'cooking',
+    'dispatched'
+  ]),
+  actorRole: z.enum(['owner', 'customer', 'kitchen_staff', 'rider', 'manager', 'admin', 'system']).optional(),
+  actorId: z.string().optional(),
+  riderId: z.string().uuid().optional(),
+  notes: z.string().max(300).optional()
+});
+
+interface LocalHistoryRecord {
+  id: string;
+  orderId: string;
+  fromStatus: string;
+  toStatus: string;
+  actorType: string;
+  actorId: string | null;
+  riderId: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+function readOrders(): Order[] {
+  try {
+    if (!fs.existsSync(ORDERS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8'));
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeOrders(orders: Order[]) {
+  try {
+    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error writing orders file:', err);
+  }
+}
+
+function appendLocalHistory(record: LocalHistoryRecord) {
+  try {
+    let list: LocalHistoryRecord[] = [];
+    if (fs.existsSync(HISTORY_FILE)) {
+      list = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+    }
+    list.push(record);
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(list, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error writing history file:', err);
+  }
+}
+
+function readLocalHistory(orderId: string): LocalHistoryRecord[] {
+  try {
+    if (!fs.existsSync(HISTORY_FILE)) return [];
+    const list: LocalHistoryRecord[] = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+    return list.filter((h) => h.orderId === orderId);
+  } catch (err) {
+    return [];
+  }
+}
+
+/**
+ * GET: Retrieves the order status, current ETA, and the complete immutable audit history trail.
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const orderLookup = params.id.trim().toUpperCase();
+  const staff = await getStaffSession(req);
+  const customerSession = getCustomerSession();
+  const supabase = getSupabaseAdminClient();
+
+  let orderData: any = null;
+  let isLocal = false;
+
+  if (supabase) {
+    try {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderLookup);
+      let query = supabase
+        .from('orders')
+        .select(`
+          id,
+          order_code,
+          customer_id,
+          phone,
+          status,
+          assigned_rider_id,
+          estimated_delivery_time,
+          assigned_rider:riders (
+            id,
+            full_name,
+            phone,
+            rating
+          ),
+          order_status_history (
+            id,
+            from_status,
+            to_status,
+            actor_type,
+            actor_id,
+            notes,
+            created_at
+          )
+        `);
+
+      if (isUuid) {
+        query = query.or(`order_code.eq.${orderLookup},id.eq.${orderLookup}`);
+      } else {
+        query = query.eq('order_code', orderLookup);
+      }
+
+      const { data: order } = await query.maybeSingle();
+      if (order) {
+        orderData = order;
+      }
+    } catch (err) {
+      console.warn('Supabase status query error, falling back to local history', err);
+    }
+  }
+
+  if (!orderData) {
+    const orders = readOrders() as any[];
+    const found = orders.find((o) => o.id.toUpperCase() === orderLookup);
+    if (!found) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+    isLocal = true;
+    orderData = found;
+  }
+
+  const isFullPrivilegedStaff = Boolean(staff && staff.role !== 'rider');
+  const isAssignedRider = Boolean(
+    staff && staff.role === 'rider' && orderData.assigned_rider_id && orderData.assigned_rider_id === staff.id
+  );
+  const isOwner = Boolean(
+    customerSession &&
+    ((orderData.customer_id && customerSession.customerId === orderData.customer_id) ||
+     (orderData.customerId && customerSession.customerId === orderData.customerId) ||
+     (orderData.phone && customerSession.phone === orderData.phone))
+  );
+
+  if (staff?.role === 'rider' && !isAssignedRider) {
+    return NextResponse.json(
+      { error: 'Access denied: Riders can only inspect orders assigned to them.' },
+      { status: 403 }
+    );
+  }
+
+  // If authenticated as a different customer, deny cross-customer access
+  if (customerSession && !isOwner && !isFullPrivilegedStaff && !isAssignedRider) {
+    return NextResponse.json(
+      { error: 'Access denied: You cannot inspect another customer\'s order status.' },
+      { status: 403 }
+    );
+  }
+
+  const authorizedForDetails = isFullPrivilegedStaff || isAssignedRider || isOwner;
+  const rawHistory = isLocal
+    ? readLocalHistory(orderData.id)
+    : (orderData.order_status_history || []);
+
+  return NextResponse.json({
+    orderId: isLocal ? orderData.id : orderData.order_code,
+    status: orderData.status,
+    eta: isLocal ? orderData.eta : orderData.estimated_delivery_time,
+    rider: authorizedForDetails ? (isLocal ? orderData.rider : orderData.assigned_rider) : null,
+    history: authorizedForDetails ? rawHistory : []
+  });
+}
+
+/**
+ * PUT: Executes a validated lifecycle transition with authorized actors and immutable audit trail.
+ */
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const orderLookup = params.id.trim().toUpperCase();
+    const rawBody = await req.json();
+
+    const parseResult = statusTransitionSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: parseResult.error.issues.map((i) => i.message).join(', ') },
+        { status: 400 }
+      );
+    }
+
+    const { notes } = parseResult.data;
+
+    // Normalize legacy status names
+    let requestedStatus: OrderStatus = parseResult.data.status as OrderStatus;
+    if (requestedStatus === ('cooking' as any)) requestedStatus = 'preparing';
+    if (requestedStatus === ('dispatched' as any)) requestedStatus = 'out_for_delivery';
+
+    // 1. RESOLVE & AUTHENTICATE ACTOR ROLE & IDENTITY
+    // Checks verified staff session, validated kitchen station terminal credentials, or verified customer cookie
+    const staffSession = await getStaffSession(req);
+    const customerSession = getCustomerSession();
+
+    let actorRole: OrderActorRole;
+    let actorId: string;
+
+    if (staffSession) {
+      actorRole = staffSession.role;
+      actorId = staffSession.id;
+    } else if (customerSession) {
+      actorRole = 'customer';
+      actorId = customerSession.customerId;
+    } else {
+      return NextResponse.json(
+        { error: 'Authentication required. Only authorized staff and verified order customers can update order status.' },
+        { status: 401 }
+      );
+    }
+
+    // 2. RETRIEVE CURRENT ORDER STATE
+    const supabase = getSupabaseAdminClient();
+    let currentOrder: { id: string; order_code: string; status: OrderStatus; customer_id?: string; customer_phone?: string; assigned_rider_id?: string } | null = null;
+
+    if (supabase) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderLookup);
+      let query = supabase
+        .from('orders')
+        .select('id, order_code, status, customer_id, phone, assigned_rider_id');
+
+      if (isUuid) {
+        query = query.or(`order_code.eq.${orderLookup},id.eq.${orderLookup}`);
+      } else {
+        query = query.eq('order_code', orderLookup);
+      }
+
+      const { data: dbOrder } = await query.maybeSingle();
+
+      if (dbOrder) {
+        currentOrder = {
+          id: dbOrder.id,
+          order_code: dbOrder.order_code,
+          status: dbOrder.status as OrderStatus,
+          customer_id: dbOrder.customer_id || undefined,
+          customer_phone: dbOrder.phone || undefined,
+          assigned_rider_id: dbOrder.assigned_rider_id || undefined
+        };
+      }
+    }
+
+    if (!currentOrder) {
+      const orders = readOrders() as any[];
+      const local = orders.find((o) => o.id.toUpperCase() === orderLookup);
+      if (local) {
+        currentOrder = {
+          id: local.id,
+          order_code: local.id,
+          status: local.status as OrderStatus,
+          customer_id: local.customerId || undefined,
+          customer_phone: local.phone || undefined
+        };
+      }
+    }
+
+    if (!currentOrder) {
+      return NextResponse.json({ error: `Order "${orderLookup}" was not found.` }, { status: 404 });
+    }
+
+    // STRICT CUSTOMER OWNERSHIP ENFORCEMENT:
+    // If an actor claims the customer role, they can ONLY modify their own orders!
+    if (actorRole === 'customer') {
+      const isOwner = Boolean(
+        customerSession &&
+        ((currentOrder.customer_id && customerSession.customerId === currentOrder.customer_id) ||
+         (currentOrder.customer_phone && customerSession.phone === currentOrder.customer_phone))
+      );
+
+      if (!isOwner) {
+        return NextResponse.json(
+          { error: 'Access denied: You are not authorized to modify an order belonging to another customer.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // STRICT RIDER OWNERSHIP ENFORCEMENT:
+    // Riders can ONLY transition orders that have been explicitly assigned to them.
+    if (actorRole === 'rider') {
+      if (!currentOrder.assigned_rider_id || currentOrder.assigned_rider_id !== actorId) {
+        return NextResponse.json(
+          { error: 'Access denied: Riders can only update status for orders assigned to them.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    const currentStatus = currentOrder.status;
+
+    // 3. VALIDATE STATE TRANSITION PERMISSION MATRIX
+    const validation = validateOrderTransition(currentStatus, requestedStatus, actorRole);
+    if (!validation.allowed) {
+      return NextResponse.json(
+        { error: validation.reason },
+        { status: 403 }
+      );
+    }
+
+    // 4. PREVENT INVENTED RIDER ASSIGNMENTS
+    // When transitioning to assigned_to_rider, a genuine, verified rider is mandatory
+    let resolvedRiderId: string | null = parseResult.data.riderId || null;
+    let assignedRiderInfo: { name: string; phone: string; rating: string } | null = null;
+
+    if (requestedStatus === 'assigned_to_rider') {
+      if (!resolvedRiderId && supabase) {
+        // Query active, available riders from database
+        const { data: activeRiders } = await supabase
+          .from('riders')
+          .select('id, full_name, phone, rating, is_active, is_available')
+          .eq('is_active', true)
+          .eq('is_available', true)
+          .limit(1);
+
+        if (!activeRiders || activeRiders.length === 0) {
+          return NextResponse.json(
+            { error: 'No active riders are currently available in Agbani. Cannot invent rider assignment.' },
+            { status: 422 }
+          );
+        }
+        resolvedRiderId = activeRiders[0].id;
+        assignedRiderInfo = {
+          name: activeRiders[0].full_name,
+          phone: activeRiders[0].phone,
+          rating: activeRiders[0].rating ? `${activeRiders[0].rating} ★` : 'Verified Courier'
+        };
+      } else if (resolvedRiderId && supabase) {
+        const { data: verifiedRider } = await supabase
+          .from('riders')
+          .select('id, full_name, phone, rating, is_active')
+          .eq('id', resolvedRiderId)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (!verifiedRider) {
+          return NextResponse.json(
+            { error: `Rider reference "${resolvedRiderId}" is not a verified active courier.` },
+            { status: 422 }
+          );
+        }
+        assignedRiderInfo = {
+          name: verifiedRider.full_name,
+          phone: verifiedRider.phone,
+          rating: verifiedRider.rating ? `${verifiedRider.rating} ★` : 'Verified Courier'
+        };
+      }
+    }
+
+    const newEta = getEstimatedDeliveryTimeForStatus(requestedStatus);
+
+    // 5. ATOMIC DATABASE EXECUTION WITH IMMUTABLE HISTORY
+    if (supabase && currentOrder.id) {
+      try {
+        const { data: rpcRes, error: rpcErr } = await supabase.rpc('transition_order_status_atomic', {
+          p_order_id: currentOrder.id,
+          p_from_status: currentStatus,
+          p_to_status: requestedStatus,
+          p_actor_type: actorRole,
+          p_actor_id: actorId,
+          p_rider_id: resolvedRiderId,
+          p_estimated_time: newEta,
+          p_notes: notes || `Transitioned to ${requestedStatus} by ${actorRole}`
+        });
+
+        if (rpcErr) {
+          console.warn('RPC transition_order_status_atomic fallback:', rpcErr.message);
+          // Direct update fallback
+          await supabase
+            .from('orders')
+            .update({
+              status: requestedStatus,
+              estimated_delivery_time: newEta,
+              assigned_rider_id: resolvedRiderId || currentOrder.assigned_rider_id || null,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', currentOrder.id);
+
+          await supabase.from('order_status_history').insert({
+            id: crypto.randomUUID(),
+            order_id: currentOrder.id,
+            status: requestedStatus,
+            from_status: currentStatus,
+            to_status: requestedStatus,
+            actor_type: actorRole,
+            actor_id: actorId,
+            rider_id: resolvedRiderId || null,
+            notes: notes || `Transitioned to ${requestedStatus}`
+          });
+        }
+      } catch (dbErr) {
+        console.error('Supabase status transition exception:', dbErr);
+      }
+    }
+
+    // 6. RECORD IMMUTABLE LOCAL AUDIT HISTORY
+    appendLocalHistory({
+      id: crypto.randomUUID(),
+      orderId: currentOrder.order_code,
+      fromStatus: currentStatus,
+      toStatus: requestedStatus,
+      actorType: actorRole,
+      actorId,
+      riderId: resolvedRiderId,
+      notes: notes || null,
+      createdAt: new Date().toISOString()
+    });
+
+    // 7. UPDATE LOCAL ORDERS MIRROR
+    const orders = readOrders();
+    const idx = orders.findIndex((o) => o.id.toUpperCase() === orderLookup);
+    if (idx !== -1) {
+      orders[idx].status = requestedStatus;
+      orders[idx].eta = newEta;
+      if (assignedRiderInfo) {
+        orders[idx].rider = assignedRiderInfo;
+      }
+      writeOrders(orders);
+    }
+
+    return NextResponse.json({
+      success: true,
+      orderId: currentOrder.order_code,
+      fromStatus: currentStatus,
+      toStatus: requestedStatus,
+      eta: newEta,
+      actorRole,
+      assignedRider: assignedRiderInfo || undefined
+    });
+  } catch (err: any) {
+    console.error('Order status transition exception:', err);
+    return NextResponse.json(
+      { error: err.message || 'Failed to execute order lifecycle transition.' },
+      { status: 500 }
+    );
+  }
+}

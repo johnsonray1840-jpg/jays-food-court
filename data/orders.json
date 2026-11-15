@@ -1,0 +1,1722 @@
+[
+  {
+    "id": "JFC-QPJ-5PK",
+    "customerId": "b4e1fa6b-b62c-405e-8b94-b2b65287966d",
+    "idempotencyKey": "idemp_1794732045317_1zlmhs2",
+    "createdAt": "2026-11-15T08:40:47.461Z",
+    "customerName": "Evelyn Dantonio",
+    "phone": "+2348182263594",
+    "address": "esut junction, (Near school gate), Enugu State",
+    "items": [
+      {
+        "key": "item-0-11",
+        "id": 11,
+        "name": "Spaghetti",
+        "img": "egusi",
+        "unit": 5450,
+        "qty": 1,
+        "swallow": null,
+        "extras": [
+          "1x Beef",
+          "1x Bottled Water",
+          "Large Double Portion",
+          "Mild Spice"
+        ],
+        "proteins": [
+          {
+            "id": "opt_beef",
+            "name": "Beef",
+            "unitPrice": 500,
+            "quantity": 1,
+            "subtotal": 500
+          }
+        ],
+        "swallows": [],
+        "addons": [
+          {
+            "id": "opt_bottled_water",
+            "name": "Bottled Water",
+            "unitPrice": 250,
+            "quantity": 1,
+            "subtotal": 250
+          }
+        ]
+      }
+    ],
+    "subtotal": 5450,
+    "discount": 0,
+    "deliveryFee": 600,
+    "total": 6050,
+    "paymentMode": "online",
+    "landmark": "school gate",
+    "deliveryOtp": "489266",
+    "deliveryOtpHash": "26a2e893b6acd591296a6752dda6c9de4728790e68ca228ed435687ef7b20102",
+    "otpAttempts": 0,
+    "status": "assigned_to_rider",
+    "eta": "8 - 12 Mins",
+    "estimatedPrepMinutes": 30,
+    "estimatedReadyTime": "2026-11-15T09:10:47.461Z",
+    "rider": {
+      "name": "Courier Emeka 1794566111991",
+      "phone": "+2348032111991",
+      "rating": "5 ★"
+    }
+  },
+  {
+    "id": "JFC-GBZ-9Y7",
+    "customerId": "b4e1fa6b-b62c-405e-8b94-b2b65287966d",
+    "idempotencyKey": "idemp_1794699967772_97pwaui",
+    "createdAt": "2026-11-14T23:46:09.415Z",
+    "customerName": "Evelyn Dantonio",
+    "phone": "+2348182263594",
+    "address": "magodo 456, (Near near esut), Enugu State",
+    "items": [
+      {
+        "key": "item-0-3",
+        "id": 3,
+        "name": "Oha Soup",
+        "img": "egusi",
+        "unit": 4800,
+        "qty": 1,
+        "swallow": "1x Pounded Yam, 1x Fufu",
+        "extras": [
+          "1x Pounded Yam",
+          "1x Fufu",
+          "Mild Spice"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_pounded_yam",
+            "name": "Pounded Yam",
+            "unitPrice": 500,
+            "quantity": 1,
+            "subtotal": 0
+          },
+          {
+            "id": "opt_fufu",
+            "name": "Fufu",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 300
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 5300,
+    "paymentMode": "online",
+    "landmark": "near esut",
+    "deliveryOtp": "426218",
+    "deliveryOtpHash": "1dc84d213630712c331ea524c0a0719a2cd97ef8a22198bc80fab88e322f1491",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-15T00:18:09.415Z",
+    "rider": {
+      "name": "Courier Chidi 1794566111991",
+      "phone": "+2348031111991",
+      "rating": "5 ★"
+    }
+  },
+  {
+    "id": "JFC-T7B-MNU",
+    "customerId": "b4e1fa6b-b62c-405e-8b94-b2b65287966d",
+    "idempotencyKey": "idemp_1794668286315_r4jbz1r",
+    "createdAt": "2026-11-14T14:58:07.719Z",
+    "customerName": "Evelyn Dantonio",
+    "phone": "+2348182263594",
+    "address": "ESUT Campus Agbani, Agbani, (Near ESUT Main Gate), Enugu State",
+    "items": [
+      {
+        "key": "item-0-17",
+        "id": 17,
+        "name": "Special Large Shawarma",
+        "img": "egusi",
+        "unit": 6250,
+        "qty": 1,
+        "swallow": null,
+        "extras": [
+          "1x Bottled Water",
+          "1x Chilled Coca-Cola (50cl)",
+          "1x Fresh Hibiscus Zobo Drink"
+        ],
+        "proteins": [],
+        "swallows": [],
+        "addons": [
+          {
+            "id": "opt_bottled_water",
+            "name": "Bottled Water",
+            "unitPrice": 250,
+            "quantity": 1,
+            "subtotal": 250
+          },
+          {
+            "id": "opt_chilled_coke",
+            "name": "Chilled Coca-Cola (50cl)",
+            "unitPrice": 400,
+            "quantity": 1,
+            "subtotal": 400
+          },
+          {
+            "id": "opt_zobo_drink",
+            "name": "Fresh Hibiscus Zobo Drink",
+            "unitPrice": 600,
+            "quantity": 1,
+            "subtotal": 600
+          }
+        ],
+        "note": "please"
+      }
+    ],
+    "subtotal": 6250,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 6750,
+    "paymentMode": "online",
+    "landmark": "ESUT Main Gate",
+    "deliveryOtp": "867376",
+    "deliveryOtpHash": "4b8a8c634a217d2e39c601e7f8eb100b684025988c284f41d1d384153dc275a0",
+    "otpAttempts": 0,
+    "status": "picked_up",
+    "eta": "3 - 8 Mins",
+    "estimatedPrepMinutes": 5,
+    "estimatedReadyTime": "2026-11-14T15:35:58.496Z",
+    "rider": {
+      "name": "Courier Ngozi 1794565952270",
+      "phone": "+2348033952270",
+      "rating": "5 ★"
+    },
+    "prepAdjustedBy": "Head Chef Chioma (kitchen_staff)"
+  },
+  {
+    "id": "JFC-789-3A3",
+    "customerId": "e08d9262-d50e-48b4-b423-30f1a94250a9",
+    "createdAt": "2026-11-14T14:10:25.261Z",
+    "customerName": "Paystack Test User",
+    "phone": "+2348099887766",
+    "address": "22 Ogui Road, Enugu, [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "deliveryOtp": "961993",
+    "deliveryOtpHash": "70ce617bc4bee8bbfb9b8d2d3806953a07ac8f2e3abc08c61b191aae732508c4",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:42:25.261Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-9FY-E4B",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T14:10:09.229Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "641251",
+    "deliveryOtpHash": "a4029237bcbc9cb1643b840b67e17559e7232f814f58b1caf31d2da066e8738a",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:42:09.229Z",
+    "rider": {
+      "name": "Courier Ngozi 1794565952270",
+      "phone": "+2348033952270",
+      "rating": "5 ★"
+    }
+  },
+  {
+    "id": "JFC-Z5A-E8X",
+    "customerId": "e08d9262-d50e-48b4-b423-30f1a94250a9",
+    "createdAt": "2026-11-14T14:06:26.805Z",
+    "customerName": "Paystack Test User",
+    "phone": "+2348099887766",
+    "address": "22 Ogui Road, Enugu, [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "deliveryOtp": "213491",
+    "deliveryOtpHash": "c0a6df55ad634f211218898730de6731d990a90a4a13f9516fea97dd6ed141f5",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:38:26.805Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-Y6A-R8N",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T14:06:10.847Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "717621",
+    "deliveryOtpHash": "577ca179c6a1e79dbe5e85628cc0aedebe44c9ec207a943a2440ee6a7025f257",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:38:10.847Z",
+    "rider": {
+      "name": "Courier Ngozi 1794565952270",
+      "phone": "+2348033952270",
+      "rating": "5 ★"
+    }
+  },
+  {
+    "id": "JFC-87D-ED6",
+    "customerId": "e08d9262-d50e-48b4-b423-30f1a94250a9",
+    "createdAt": "2026-11-14T14:05:42.469Z",
+    "customerName": "Paystack Test User",
+    "phone": "+2348099887766",
+    "address": "22 Ogui Road, Enugu, [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "deliveryOtp": "200314",
+    "deliveryOtpHash": "b026b99faf7ed91b5b0a851e76992b662ac2e33829e4463c813197803b46e0c8",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:37:42.469Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-7AX-8HS",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T14:05:35.742Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "761080",
+    "deliveryOtpHash": "67d72784623acb95c78232c4dbc5e9e087d79ae6b31aa217bd9f5d0a15de58d1",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:37:35.741Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-KRX-5KD",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:58:00.522Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "103115",
+    "deliveryOtpHash": "79f05d103f47d421f19df445c538d54418caf9389cc3450b674988070da039a3",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:30:00.522Z",
+    "rider": {
+      "name": "Courier Ngozi 1794565952270",
+      "phone": "+2348033952270",
+      "rating": "5 ★"
+    }
+  },
+  {
+    "id": "JFC-884-BXJ",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:57:10.706Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "291885",
+    "deliveryOtpHash": "922e433336d6151ec8efbae98f6ac139a3ed33f429d32c374c6f9713381293d7",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:29:10.706Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-XH6-UEC",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:56:04.087Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "223976",
+    "deliveryOtpHash": "2caff597b7de5384ac1e27fe6bf941ca4a8015a5fe60362e1524b7066a8a68c3",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:28:04.087Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-W44-EXM",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:54:49.191Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "928810",
+    "deliveryOtpHash": "6b592f79d55d9ed5c6668be8779c990db79c126bd60bcdf31a8d1e757e60edda",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:26:49.191Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-S9V-4FJ",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:54:11.347Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "947007",
+    "deliveryOtpHash": "0912807d932327d15ca4a6b69d200d5c3d6d5a8cb448f025c28ce05c7a6058a4",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:26:11.347Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-QCC-TWF",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:53:11.106Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "338088",
+    "deliveryOtpHash": "08a8e3494bb2fb0a46439be4b2d07e4eb51211e7384c1812271073fbc81daecd",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:25:11.106Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-UFB-8MA",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:48:20.687Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "612251",
+    "deliveryOtpHash": "eca1455597c57e7d7137b4492d2851522d343875c1dbce5a2f4bedf736696ec0",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:20:20.687Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-UGY-T6X",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:41:36.392Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "233414",
+    "deliveryOtpHash": "2426d7817255efb850ec7748992b8d0173c135d727acb684c1ca8aa35080663b",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:13:36.391Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-C8S-3Y7",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:38:51.463Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, (Near Near Government House Gate), [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "landmark": "Near Government House Gate",
+    "deliveryOtp": "699025",
+    "deliveryOtpHash": "0fda854df12ec01a15b93f6ef06b330b07ecf78f3ee62bb54df460227747d4e9",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:10:51.463Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-FFG-KXN",
+    "customerId": "707ad78a-cb9a-446a-b982-ef0be6fb399a",
+    "createdAt": "2026-11-14T13:37:13.211Z",
+    "customerName": "Test Customer Enugu",
+    "phone": "+2348012345678",
+    "address": "Plot 12 Independence Layout, Enugu, [Zone: zone_enugu_independence_layout], Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "1x Eba",
+        "extras": [
+          "1x Eba"
+        ],
+        "proteins": [],
+        "swallows": [
+          {
+            "id": "opt_eba",
+            "name": "Eba",
+            "unitPrice": 300,
+            "quantity": 1,
+            "subtotal": 0
+          }
+        ],
+        "addons": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1500,
+    "total": 6000,
+    "paymentMode": "online",
+    "deliveryCoordinates": {
+      "latitude": 6.4474,
+      "longitude": 7.509
+    },
+    "deliveryZoneId": "zone_enugu_independence_layout",
+    "deliveryOtp": "631277",
+    "deliveryOtpHash": "a8a5a2c5167cf4bbf1e871b8c7d524da130c38b2265b2c331c6fc6d0ba47eb9b",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "35 - 50 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-14T14:09:13.211Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-ZBK-4PZ",
+    "customerId": "b4e1fa6b-b62c-405e-8b94-b2b65287966d",
+    "idempotencyKey": "idemp_1794600837593_2h263s4",
+    "createdAt": "2026-11-13T20:13:59.331Z",
+    "customerName": "Evelyn Dantonio",
+    "phone": "+2348182263594",
+    "address": "Gariki &amp; Awkunanaw, Enugu South, (Near Gariki Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Ogbono Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 1,
+        "swallow": "Pounded Yam",
+        "extras": []
+      }
+    ],
+    "subtotal": 4500,
+    "discount": 0,
+    "deliveryFee": 1200,
+    "total": 5700,
+    "paymentMode": "online",
+    "landmark": "Gariki Market",
+    "deliveryOtp": "106678",
+    "deliveryOtpHash": "bc0e97ca029d61480e84488591a61047b8c75a6d8024f305556c751a53275689",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 5,
+    "estimatedReadyTime": "2026-11-13T20:30:32.114Z",
+    "rider": {
+      "name": "Courier Emeka 1794565952270",
+      "phone": "+2348032952270",
+      "rating": "5 ★"
+    },
+    "prepAdjustedBy": "Head Chef Chioma (kitchen_staff)"
+  },
+  {
+    "id": "JFC-ARD-WQ4",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T19:13:28.149Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "460844",
+    "deliveryOtpHash": "22bded6b045d01a716dc0cbd24911c5ab402e2eab2710e1390071c7c28e0e7fe",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T19:45:28.149Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-2UY-A88",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T19:12:30.248Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "881972",
+    "deliveryOtpHash": "633be96ae3d937f77d0392c0eb69c9c314895f040f2b0000429048380fba8abc",
+    "otpAttempts": 0,
+    "status": "delivered",
+    "eta": "Delivered",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T19:44:30.248Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-C9D-JSZ",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T19:04:02.393Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "356096",
+    "deliveryOtpHash": "ca6a540288eb2735cb2d866d7353643cbb744a3d6013fe4326f4c222aacb1452",
+    "otpAttempts": 0,
+    "status": "out_for_delivery",
+    "eta": "3 - 8 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T19:36:02.393Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-BPE-FHU",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T10:49:34.228Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "645710",
+    "deliveryOtpHash": "d0f4bcb4a0dfffdf38b953e01a7718865b9e29034289e46f30916cea64e394c8",
+    "otpAttempts": 0,
+    "status": "out_for_delivery",
+    "eta": "3 - 8 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T11:21:34.228Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-5XS-NTE",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T10:44:11.446Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "261909",
+    "deliveryOtpHash": "a9ba050b4e0aaefd1dacaba854104493dabb1d7efd2d8f75dba36edfe4896dbf",
+    "otpAttempts": 0,
+    "status": "out_for_delivery",
+    "eta": "3 - 8 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T11:16:11.446Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-MVT-GKM",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T10:40:12.375Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "851018",
+    "deliveryOtpHash": "dbb7a78bdb0390fe32de7f5d1254f294b9dbb40a1e968e836e177faf70183846",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T11:12:12.375Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-UDN-EA4",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T10:36:26.334Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "693129",
+    "deliveryOtpHash": "04b6d7f683312d80e42f316835e480269ec7a48bc5db1eb2b4e279edbfc6029c",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T11:08:26.334Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-KKG-2V6",
+    "customerId": "d5199bb3-1ea0-46a5-bb5f-aa3c1558b6c9",
+    "createdAt": "2026-11-13T10:32:54.575Z",
+    "customerName": "Customer Somto",
+    "phone": "+2348098887777",
+    "address": "Ndiagu Ugwu, Agbani, Enugu State, (Near Near Eke Agbani Market), Enugu State",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Egusi Soup",
+        "img": "egusi",
+        "unit": 4500,
+        "qty": 2,
+        "swallow": null,
+        "extras": [],
+        "note": "Extra pepper"
+      }
+    ],
+    "subtotal": 9000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 9500,
+    "paymentMode": "online",
+    "landmark": "Near Eke Agbani Market",
+    "deliveryOtp": "216028",
+    "deliveryOtpHash": "3a9299f827ed8bd76fbd7bceb22257d3ff4eb1712ad074d8561d699144dbf49c",
+    "otpAttempts": 0,
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "estimatedPrepMinutes": 32,
+    "estimatedReadyTime": "2026-11-13T11:04:54.575Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-4BH-AZE",
+    "customerId": "6426c7dd-8063-4713-996c-f4d1659879d4",
+    "idempotencyKey": "idemp_1794515371978_qlffqih",
+    "createdAt": "2026-11-12T20:29:32.939Z",
+    "customerName": "praise Godswill",
+    "phone": "+2349018403385",
+    "address": "Agbani (Town &amp; Ndiagu Ugwu), Agbani, Enugu State, (Near Ndiagu Ugwu), Enugu State",
+    "items": [
+      {
+        "key": "item-0-24",
+        "id": 24,
+        "name": "Chilled Drinks & Zobo",
+        "img": "egusi",
+        "unit": 1000,
+        "qty": 3,
+        "swallow": null,
+        "extras": [],
+        "note": "please make sure its cold"
+      }
+    ],
+    "subtotal": 3000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 3500,
+    "paymentMode": "online",
+    "landmark": "Ndiagu Ugwu",
+    "deliveryOtp": "7482",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "estimatedPrepMinutes": 22,
+    "estimatedReadyTime": "2026-11-12T20:51:32.939Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-S9H-XQZ",
+    "customerId": "6426c7dd-8063-4713-996c-f4d1659879d4",
+    "idempotencyKey": "idemp_1794480818577_0fxkhjm",
+    "createdAt": "2026-11-12T10:53:40.197Z",
+    "customerName": "praise Godswill",
+    "phone": "+2349018403385",
+    "address": "Agbani (Town &amp; Ndiagu Ugwu), Agbani, Enugu State, (Near Ndiagu Ugwu), Enugu State",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 5000,
+        "qty": 1,
+        "swallow": "Semovita",
+        "extras": [
+          "Extra Assorted Beef"
+        ]
+      }
+    ],
+    "subtotal": 5000,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 5500,
+    "paymentMode": "online",
+    "landmark": "Ndiagu Ugwu",
+    "deliveryOtp": "6305",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "estimatedPrepMinutes": 28,
+    "estimatedReadyTime": "2026-11-12T11:21:40.197Z",
+    "rider": null
+  },
+  {
+    "id": "JFC-DCQ-754",
+    "customerId": "1dbf0848-1c70-4f2d-a9ca-66287f0eaf57",
+    "idempotencyKey": "live-custb-1794429223491",
+    "createdAt": "2026-11-11T20:33:53.312Z",
+    "customerName": "PhaseF CustB",
+    "phone": "+2348069223491",
+    "address": "99 Agbani Express, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 3800,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4300,
+    "paymentMode": "cod",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-27Q-TVN",
+    "customerId": "1dbf0848-1c70-4f2d-a9ca-66287f0eaf57",
+    "idempotencyKey": "live-conc-1794429223491",
+    "createdAt": "2026-11-11T20:33:52.519Z",
+    "customerName": "PhaseF CustB",
+    "phone": "+2348069223491",
+    "address": "99 Agbani Express, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 3800,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4300,
+    "paymentMode": "cod",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-YJE-E7Y",
+    "customerId": "89ca6cc6-73ff-468a-a270-11e24c611b17",
+    "idempotencyKey": "live-conc-1794429223491",
+    "createdAt": "2026-11-11T20:33:51.146Z",
+    "customerName": "PhaseF CustA",
+    "phone": "+2348059223491",
+    "address": "10 ESUT Gate, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Royal Egusi Soup",
+        "img": "egusi",
+        "unit": 3500,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3500,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4000,
+    "paymentMode": "transfer",
+    "status": "delivered",
+    "eta": "Delivered",
+    "rider": {
+      "name": "PhaseF Rider",
+      "phone": "+2348099223491",
+      "rating": "4.9 ★"
+    }
+  },
+  {
+    "id": "JFC-6QH-T5Z",
+    "customerId": "8a8da1eb-3941-4d26-bc8a-6a64a1ca7771",
+    "idempotencyKey": "live-custb-1794429114272",
+    "createdAt": "2026-11-11T20:32:03.810Z",
+    "customerName": "PhaseF CustB",
+    "phone": "+2348069114272",
+    "address": "99 Agbani Express, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 3800,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4300,
+    "paymentMode": "cod",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-44H-3UC",
+    "customerId": "8a8da1eb-3941-4d26-bc8a-6a64a1ca7771",
+    "idempotencyKey": "live-conc-1794429114272",
+    "createdAt": "2026-11-11T20:32:03.043Z",
+    "customerName": "PhaseF CustB",
+    "phone": "+2348069114272",
+    "address": "99 Agbani Express, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 3800,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4300,
+    "paymentMode": "cod",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-JX4-JDC",
+    "customerId": "2dc3e383-a151-403b-bbdd-50ce99a3e2d0",
+    "idempotencyKey": "live-conc-1794429114272",
+    "createdAt": "2026-11-11T20:32:01.613Z",
+    "customerName": "PhaseF CustA",
+    "phone": "+2348059114272",
+    "address": "10 ESUT Gate, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Royal Egusi Soup",
+        "img": "egusi",
+        "unit": 3500,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3500,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4000,
+    "paymentMode": "transfer",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-49Y-FT5",
+    "customerId": "304ed7ed-968b-456e-b8bc-66f02098a79c",
+    "idempotencyKey": "live-custb-1794429042628",
+    "createdAt": "2026-11-11T20:30:54.174Z",
+    "customerName": "PhaseF CustB",
+    "phone": "+2348069042628",
+    "address": "99 Agbani Express, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 3800,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4300,
+    "paymentMode": "cod",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-KKJ-TMU",
+    "customerId": "304ed7ed-968b-456e-b8bc-66f02098a79c",
+    "idempotencyKey": "live-conc-1794429042628",
+    "createdAt": "2026-11-11T20:30:53.254Z",
+    "customerName": "PhaseF CustB",
+    "phone": "+2348069042628",
+    "address": "99 Agbani Express, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-2",
+        "id": 2,
+        "name": "Special Ogbono Soup",
+        "img": "egusi",
+        "unit": 3800,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3800,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4300,
+    "paymentMode": "cod",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-U53-WA9",
+    "customerId": "9e8b5994-d502-4a7b-b8d0-6182627ef6b7",
+    "idempotencyKey": "live-conc-1794429042628",
+    "createdAt": "2026-11-11T20:30:51.798Z",
+    "customerName": "PhaseF CustA",
+    "phone": "+2348059042628",
+    "address": "10 ESUT Gate, Agbani, Enugu",
+    "items": [
+      {
+        "key": "item-0-1",
+        "id": 1,
+        "name": "Royal Egusi Soup",
+        "img": "egusi",
+        "unit": 3500,
+        "qty": 1,
+        "swallow": null,
+        "extras": []
+      }
+    ],
+    "subtotal": 3500,
+    "discount": 0,
+    "deliveryFee": 500,
+    "total": 4000,
+    "paymentMode": "transfer",
+    "status": "confirmed",
+    "eta": "18 - 25 Mins",
+    "rider": null
+  },
+  {
+    "id": "JFC-5827",
+    "createdAt": "2026-11-10T11:28:38.543Z",
+    "customerName": "praise Godswill",
+    "phone": "09018403385",
+    "address": "josh street",
+    "items": [
+      {
+        "key": "1|Pounded Yam||",
+        "id": 1,
+        "name": "Royal Egusi Soup",
+        "img": "assets/images/egusi.jpg",
+        "unit": 3500,
+        "qty": 1,
+        "swallow": "Pounded Yam",
+        "extras": [],
+        "note": ""
+      }
+    ],
+    "subtotal": 3500,
+    "discount": 1050,
+    "deliveryFee": 500,
+    "total": 2950,
+    "paymentMode": "transfer",
+    "status": "delivered",
+    "eta": "Delivered",
+    "rider": {
+      "name": "Chinedu Okafor",
+      "phone": "07087426626",
+      "rating": "4.9 ★"
+    }
+  }
+]

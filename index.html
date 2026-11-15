@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jay's Food Court - Ultra-Premium Cuisine & Fast Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- STICKY TOP NAVBAR -->
+  <header class="top-nav" id="topNav">
+    <div class="nav-container">
+      <a href="#top" class="nav-brand">
+        <span class="brand-badge"><i class="fa-solid fa-utensils"></i></span>
+        <span class="brand-name">Jay's <span class="highlight">FoodCourt</span></span>
+      </a>
+
+      <!-- Location Indicator (Chowdeck style) -->
+      <div class="location-pill" onclick="triggerLocationChange()">
+        <i class="fa-solid fa-location-dot location-icon"></i>
+        <div class="loc-text">
+          <span class="loc-label">Delivering to</span>
+          <span class="loc-val" id="currentLocationText">Agbani, Enugu</span>
+        </div>
+        <i class="fa-solid fa-chevron-down loc-arrow"></i>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="nav-links">
+        <a href="#menu" class="active">Menu</a>
+        <a href="#popular">Popular Dishes</a>
+        <a href="#rewards">Refer &amp; Earn</a>
+        <a href="#track">Track Order</a>
+        <a href="kitchen.html" class="kitchen-link" target="_blank"><i class="fa-solid fa-fire-burner"></i> Kitchen Desk</a>
+      </nav>
+
+      <!-- Cart Button & WhatsApp CTA -->
+      <div class="nav-actions">
+        <a href="https://wa.me/2347087426626" target="_blank" class="nav-wa-btn" title="Direct WhatsApp Support">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>Support</span>
+        </a>
+        <button class="cart-trigger" id="cartOpenBtn" aria-label="View Shopping Cart">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="cart-badge-count" id="navCartCount">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO SECTION (DRIBBLE MASTERPIECE + REDEFINED MOBILE FLOW) -->
+    <section class="hero-section">
+      <div class="hero-container">
+        <!-- Left Column: Copy & Actions -->
+        <div class="hero-content">
+          <div class="welcome-pill">
+            <span class="welcome-dot"></span> Welcome to Jay's Food Court
+          </div>
+          <h1 class="hero-title">
+            Artisanal Dining and Enjoy <span class="marked-word">The Food<svg class="hand-loop" viewBox="0 0 200 60"><ellipse cx="100" cy="30" rx="95" ry="25" fill="none" stroke="#FFB800" stroke-width="3.5" stroke-dasharray="10 3" transform="rotate(-3 100 30)"/></svg></span>
+          </h1>
+          <p class="hero-desc">
+            Authentic Ogbono, Egusi, Draw Soup, Fried Rice, Yam &amp; Egg cooked freshly with premium ingredients and delivered straight to your door in Agbani.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#menu" class="btn btn-primary">
+              <span>Order Online</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a href="#track" class="btn btn-outline">
+              <i class="fa-solid fa-motorcycle"></i>
+              <span>Track Order</span>
+            </a>
+          </div>
+
+          <div class="hero-hours">
+            <i class="fa-regular fa-clock"></i>
+            <span>Kitchen Open: <b>08:00am - 10:00pm daily</b></span>
+          </div>
+        </div>
+
+        <!-- Right Column: Dribbble Circular Platter Display -->
+        <div class="hero-graphic">
+          <div class="dashed-circle-wrap">
+            <svg class="dashed-orbit" viewBox="0 0 460 460">
+              <circle cx="230" cy="230" r="215" fill="none" stroke="#FFB800" stroke-width="4.5" stroke-dasharray="18 12" />
+            </svg>
+            <div class="hero-plate-shadow">
+              <img src="assets/images/hero.jpg" alt="Jay's Food Court Signature Banquet" class="hero-plate-img" id="heroPlateImg">
+            </div>
+            <!-- Floating Badge: Best Food -->
+            <div class="badge-best-food">
+              <span>Best Food</span> <i class="fa-solid fa-fire text-amber"></i>
+            </div>
+            <!-- Floating Food Card (As in Dribbble reference) -->
+            <div class="floating-dish-card" onclick="openDishModal(1)">
+              <div class="mini-thumb">
+                <img src="assets/images/egusi.jpg" alt="Royal Egusi Soup">
+              </div>
+              <div class="mini-info">
+                <h6>Royal Egusi Soup</h6>
+                <div class="mini-stars">★★★★★</div>
+                <span class="mini-price">₦3,500</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROMO REFERRAL BANNER (FROM FLYER) -->
+    <section class="promo-banner-section" id="rewards">
+      <div class="promo-card">
+        <div class="promo-left">
+          <span class="promo-tag">COMBO! COMBO! COMBO!</span>
+          <h2 class="promo-title">Refer 10 Friends, Get <span class="cash-reward">₦10,000 Cash</span></h2>
+          <p class="promo-sub">Plus enjoy <b>20% win</b> when you patronise and <b>30% off</b> when you place orders online!</p>
+          <div class="promo-meta">
+            <span class="promo-loc"><i class="fa-solid fa-location-dot"></i> Ndiagu Ugwu, Agbani, Enugu</span>
+            <a href="#menu" class="btn btn-dark">Claim 30% Off Now</a>
+          </div>
+        </div>
+        <div class="promo-right">
+          <div class="chef-img-wrapper">
+            <img src="assets/images/chef_banner.jpg" alt="Jay's Food Court Chef Jay" class="chef-img">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- POPULAR DISHES (DRIBBLE CARD LAYOUT) -->
+    <section class="section-popular" id="popular">
+      <div class="section-header">
+        <div>
+          <span class="sec-subtitle">Chef's Recommendations</span>
+          <h2 class="sec-title">Our Popular <span class="marked-word">Dishes<svg class="hand-loop" viewBox="0 0 160 50"><ellipse cx="80" cy="25" rx="75" ry="20" fill="none" stroke="#FFB800" stroke-width="3" stroke-dasharray="8 3" transform="rotate(-2 80 25)"/></svg></span></h2>
+        </div>
+        <div class="slider-arrows">
+          <button class="arrow-btn" onclick="scrollDishes(-1)" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="arrow-btn active" onclick="scrollDishes(1)" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Carousel Container -->
+      <div class="popular-scroll-container" id="popularScroll">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
+    <!-- FULL MENU & CATEGORY FILTER SECTION -->
+    <section class="section-menu" id="menu">
+      <div class="section-header text-center-header">
+        <span class="sec-subtitle">Explore Our Kitchen</span>
+        <h2 class="sec-title">Fresh &amp; Direct <span class="marked-word">Menu<svg class="hand-loop" viewBox="0 0 140 50"><ellipse cx="70" cy="25" rx="65" ry="20" fill="none" stroke="#FFB800" stroke-width="3" stroke-dasharray="8 3"/></svg></span></h2>
+        <p class="sec-desc">Direct amount on all food and chilled drinks available. No hidden charges.</p>
+      </div>
+
+      <!-- Search Input -->
+      <div class="menu-search-wrapper">
+        <div class="menu-search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="menuSearchInput" placeholder="Search egusi, ogbono, fried rice, yam and egg, drinks...">
+          <button class="clear-search-btn" id="clearSearchBtn" style="display: none;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills-wrap" id="categoryPills">
+        <!-- Rendered via JavaScript -->
+      </div>
+
+      <!-- Main Food Grid -->
+      <div class="menu-grid" id="mainMenuGrid">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
+    <!-- HOW CHOWDECK-STYLE ORDERING WORKS -->
+    <section class="section-steps" id="how">
+      <div class="section-header text-center-header">
+        <span class="sec-subtitle">Seamless Delivery</span>
+        <h2 class="sec-title">How JayFoodCourt <span class="marked-word">Works<svg class="hand-loop" viewBox="0 0 150 50"><ellipse cx="75" cy="25" rx="70" ry="20" fill="none" stroke="#FFB800" stroke-width="3" stroke-dasharray="8 3"/></svg></span></h2>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon"><i class="fa-solid fa-utensils"></i></div>
+          <h3>Select Your Food</h3>
+          <p>Choose from our soups (Ogbono, Egusi, Draw Soup), Rice varieties, or Yam &amp; Egg with custom swallow.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon"><i class="fa-solid fa-phone-volume"></i></div>
+          <h3>Guest Checkout</h3>
+          <p>Zero login required. Just enter your phone number &amp; Agbani address. Instant payment via Card, Transfer or Delivery.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+          <h3>Live Tracking</h3>
+          <p>Track your food in real time as our chef cooks it and the rider heads directly to your door.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE ORDER TRACKER TOOL -->
+    <section class="section-tracker" id="track">
+      <div class="tracker-card">
+        <div class="tracker-header">
+          <span class="sec-subtitle">Chowdeck-Style Real Time</span>
+          <h2 class="tracker-title">Live Order <span class="marked-word">Tracker<svg class="hand-loop" viewBox="0 0 170 50"><ellipse cx="85" cy="25" rx="80" ry="20" fill="none" stroke="#FFB800" stroke-width="3" stroke-dasharray="8 3"/></svg></span></h2>
+          <p class="tracker-sub">Enter your order reference code (e.g., <b>JFC-1042</b>) to follow your meal live.</p>
+        </div>
+
+        <div class="tracker-search-bar">
+          <input type="text" id="trackInput" placeholder="Enter Order ID e.g. JFC-8921">
+          <button class="btn btn-primary" id="trackSubmitBtn">
+            <span>Track Live</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- Live Tracker Visual Container -->
+        <div class="tracker-status-box" id="trackerStatusBox">
+          <div class="order-id-badge" id="trackerBadge">Order #JFC-DEMO</div>
+          <div class="eta-banner">
+            <div>
+              <span class="eta-sub">ESTIMATED DELIVERY TIME</span>
+              <h4 class="eta-time" id="trackerEta">18 - 25 Mins</h4>
+            </div>
+            <span class="badge-status-pill" id="trackerStatusBadge">In the kitchen</span>
+          </div>
+
+          <!-- 4 Step Stepper -->
+          <div class="progress-track-wrapper">
+            <div class="progress-bar-fill" id="trackProgressBar"></div>
+            <div class="track-step-node active" id="node-0">
+              <div class="node-circle"><i class="fa-solid fa-receipt"></i></div>
+              <span class="node-label">Confirmed</span>
+            </div>
+            <div class="track-step-node" id="node-1">
+              <div class="node-circle"><i class="fa-solid fa-fire-burner"></i></div>
+              <span class="node-label">Cooking</span>
+            </div>
+            <div class="track-step-node" id="node-2">
+              <div class="node-circle"><i class="fa-solid fa-motorcycle"></i></div>
+              <span class="node-label">Dispatched</span>
+            </div>
+            <div class="track-step-node" id="node-3">
+              <div class="node-circle"><i class="fa-solid fa-house-chimney"></i></div>
+              <span class="node-label">Delivered</span>
+            </div>
+          </div>
+
+          <!-- Rider Contact Card -->
+          <div class="rider-concierge-card" id="riderCard">
+            <div class="rider-avatar">
+              <i class="fa-solid fa-helmet-safety"></i>
+            </div>
+            <div class="rider-info">
+              <h5 class="rider-name">Chinedu Okafor</h5>
+              <p class="rider-meta">Jay's Food Court Dedicated Courier • 4.9 ★</p>
+            </div>
+            <div class="rider-actions">
+              <a href="tel:07087426626" class="rider-btn call-btn" title="Call Courier"><i class="fa-solid fa-phone"></i></a>
+              <a href="https://wa.me/2347087426626" class="rider-btn wa-btn" title="WhatsApp Courier"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="main-footer" id="contact">
+    <div class="footer-container">
+      <div class="footer-brand-col">
+        <a href="#top" class="footer-logo">
+          <span class="brand-badge"><i class="fa-solid fa-utensils"></i></span>
+          <span class="brand-name">Jay's <span class="highlight">FoodCourt</span></span>
+        </a>
+        <p class="footer-desc">
+          Ultra-premium food ordering platform serving authentic Nigerian delicacies across Agbani and Enugu. Cooked with pride and delivered with speed.
+        </p>
+        <div class="footer-badges">
+          <span><i class="fa-solid fa-shield-check text-amber"></i> Verified Kitchen</span>
+          <span><i class="fa-solid fa-temperature-arrow-up text-amber"></i> Thermal Sealed Packaging</span>
+        </div>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 class="f-title">Quick Links</h4>
+        <ul>
+          <li><a href="#menu">Full Menu</a></li>
+          <li><a href="#popular">Chef's Specials</a></li>
+          <li><a href="#rewards">Refer &amp; Earn ₦10,000</a></li>
+          <li><a href="#track">Live Order Tracker</a></li>
+          <li><a href="kitchen.html" target="_blank">Kitchen Manager</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-location-col">
+        <h4 class="f-title">Kitchen Location</h4>
+        <p class="f-address"><i class="fa-solid fa-location-dot"></i> Ndiagu Ugwu, Umuezeakwunanaw, Agbani, Enugu State</p>
+        <p class="f-phone"><i class="fa-solid fa-phone"></i> 07087426626</p>
+        <a href="https://wa.me/2347087426626" target="_blank" class="btn btn-whatsapp-footer">
+          <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Jay's Food Court LTD. All rights reserved. Built with luxury precision.</p>
+    </div>
+  </footer>
+
+  <!-- FLOATING CHOWDECK MOBILE CART BAR -->
+  <div class="floating-mobile-bar" id="floatingMobileBar">
+    <button class="mobile-bag-btn" id="mobileBagBtn">
+      <div class="bar-left">
+        <span class="bar-badge" id="mobileBarBadge">0</span>
+        <span class="bar-text">View Bag</span>
+      </div>
+      <div class="bar-right">
+        <span class="bar-price" id="mobileBarTotal">₦0</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </div>
+    </button>
+  </div>
+
+  <!-- DISH CUSTOMIZATION MODAL (SWALLOW & PROTEIN) -->
+  <div class="modal-backdrop" id="dishModalBackdrop"></div>
+  <div class="custom-modal-sheet" id="dishModalSheet">
+    <div class="modal-header-visual">
+      <button class="close-modal-btn" id="closeDishModalBtn">&times;</button>
+      <img src="assets/images/egusi.jpg" alt="Dish Name" class="modal-dish-img" id="modalDishImg">
+    </div>
+    <div class="modal-body-content">
+      <div class="modal-title-row">
+        <div>
+          <h3 class="modal-dish-title" id="modalDishTitle">Dish Title</h3>
+          <p class="modal-dish-desc" id="modalDishDesc">Delicious ingredients...</p>
+        </div>
+        <span class="modal-dish-price" id="modalDishPrice">₦0</span>
+      </div>
+
+      <!-- Swallow Options (For Soups) -->
+      <div class="swallow-section" id="swallowOptionSection">
+        <div class="option-header">
+          <span class="option-title">Choose Swallow <span class="req">*Required</span></span>
+          <span class="option-rule">Pick 1</span>
+        </div>
+        <div class="swallow-radio-list">
+          <label class="radio-card selected">
+            <input type="radio" name="swallow" value="Pounded Yam" checked>
+            <div class="radio-content">
+              <b>Pounded Yam</b>
+              <span>Smooth &amp; hot</span>
+            </div>
+            <i class="fa-solid fa-circle-check radio-icon"></i>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="swallow" value="Yellow Garri (Eba)">
+            <div class="radio-content">
+              <b>Yellow Garri (Eba)</b>
+              <span>Freshly prepared</span>
+            </div>
+            <i class="fa-regular fa-circle radio-icon"></i>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="swallow" value="Semovita">
+            <div class="radio-content">
+              <b>Semovita</b>
+              <span>Soft &amp; fluffy</span>
+            </div>
+            <i class="fa-regular fa-circle radio-icon"></i>
+          </label>
+        </div>
+      </div>
+
+      <!-- Extra Protein Addons -->
+      <div class="protein-section" id="proteinOptionSection">
+        <div class="option-header">
+          <span class="option-title">Add Extra Protein</span>
+          <span class="option-rule">Optional</span>
+        </div>
+        <div class="protein-checkbox-list">
+          <label class="check-card">
+            <input type="checkbox" name="extra_protein" value="Assorted Beef" data-price="1200">
+            <div class="check-content">
+              <b>Extra Assorted Beef</b>
+              <span>+₦1,200</span>
+            </div>
+            <span class="custom-checkbox"></span>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" name="extra_protein" value="Fresh Catfish / Titus" data-price="1800">
+            <div class="check-content">
+              <b>Fresh Catfish / Titus Fish</b>
+              <span>+₦1,800</span>
+            </div>
+            <span class="custom-checkbox"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Special Kitchen Notes -->
+      <div class="notes-section">
+        <span class="option-title">Special Kitchen Instructions</span>
+        <textarea id="modalSpecialNotes" placeholder="e.g. Please make it very spicy, extra scent leaf, light oil..." rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Modal Sticky Footer -->
+    <div class="modal-footer-bar">
+      <div class="qty-stepper">
+        <button id="modalQtyMinus">-</button>
+        <span id="modalQtyVal">1</span>
+        <button id="modalQtyPlus">+</button>
+      </div>
+      <button class="btn btn-primary btn-add-modal" id="modalAddToCartBtn">
+        <span>Add to Bag</span>
+        <span id="modalBtnTotalPrice">₦3,500</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CHOWDECK SLIDE-OUT CART DRAWER -->
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-wrap">
+        <h3>Your Order Bag</h3>
+        <span class="drawer-badge" id="drawerBadge">0 items</span>
+      </div>
+      <button class="close-drawer-btn" id="closeCartBtn">&times;</button>
+    </div>
+
+    <div class="drawer-cart-list" id="drawerCartList">
+      <!-- Cart items injected here -->
+    </div>
+
+    <div class="drawer-checkout-box">
+      <!-- Guest Details Form (No Login Required) -->
+      <div class="guest-form">
+        <h4 class="form-title"><i class="fa-solid fa-user"></i> Guest Delivery Details</h4>
+        <input type="text" id="custName" placeholder="Your Full Name (e.g. Nkem Okafor)" required>
+        <input type="tel" id="custPhone" placeholder="WhatsApp / Phone (e.g. 08012345678)" required>
+        <input type="text" id="custAddress" placeholder="Street / Landmark in Agbani, Enugu" required>
+        
+        <!-- Payment Mode -->
+        <div class="pay-method-selector">
+          <label class="pay-option active">
+            <input type="radio" name="payment_mode" value="transfer" checked>
+            <span><i class="fa-solid fa-building-columns"></i> Instant Transfer / Paystack</span>
+          </label>
+          <label class="pay-option">
+            <input type="radio" name="payment_mode" value="cod">
+            <span><i class="fa-solid fa-money-bill-wave"></i> Pay on Delivery</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="bill-summary">
+        <div class="bill-row"><span>Subtotal</span><b id="billSubtotal">₦0</b></div>
+        <div class="bill-row"><span>Delivery to Agbani</span><b>₦500</b></div>
+        <div class="bill-row"><span>Promo Discount</span><b class="text-green" id="billDiscount">-₦0</b></div>
+        <div class="bill-row total"><span>Total Payable</span><b id="billTotal">₦0</b></div>
+      </div>
+
+      <button class="btn btn-primary btn-full-checkout" id="submitOrderBtn">
+        <span>Place Order Now</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <p class="checkout-guarantee"><i class="fa-solid fa-lock"></i> Direct kitchen dispatch • No password needed</p>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

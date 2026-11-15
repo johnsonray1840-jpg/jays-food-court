@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jay's Food Court - Kitchen Order Manager</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-luxury { font-family: 'Playfair Display', serif; }
+  </style>
+</head>
+<body class="bg-[#09090b] text-zinc-100 min-h-screen p-4 md:p-8">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Top Admin Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-zinc-900 border border-zinc-800 p-5 rounded-3xl gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-amber-400 text-zinc-950 flex items-center justify-center text-xl font-black">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-black text-white">Jay's Food Court <span class="text-amber-400 font-luxury italic">Kitchen Desk</span></h1>
+          <p class="text-xs text-zinc-400 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Agbani Order Dispatch Active
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="fetchOrders()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-full transition flex items-center gap-2">
+          <i class="fa-solid fa-rotate"></i> Refresh Orders
+        </button>
+        <a href="/" target="_blank" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-zinc-950 text-xs font-bold rounded-full transition flex items-center gap-2">
+          <i class="fa-solid fa-store"></i> Open Storefront
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Metrics Counter -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
+        <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Incoming New</span>
+        <h3 class="text-2xl font-black text-amber-400 mt-1" id="count-confirmed">0</h3>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
+        <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">In Kitchen Cooking</span>
+        <h3 class="text-2xl font-black text-blue-400 mt-1" id="count-cooking">0</h3>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
+        <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Dispatched (With Rider)</span>
+        <h3 class="text-2xl font-black text-purple-400 mt-1" id="count-dispatched">0</h3>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
+        <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Delivered Today</span>
+        <h3 class="text-2xl font-black text-emerald-400 mt-1" id="count-delivered">0</h3>
+      </div>
+    </div>
+
+    <!-- Active Orders Feed Grid -->
+    <div class="space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-bell text-amber-400"></i> Active Customer Orders
+        </h2>
+        <span class="text-xs text-zinc-500">Auto-refreshes every 5 seconds</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="ordersContainer">
+        <!-- Rendered via JavaScript -->
+        <div class="col-span-full py-16 text-center text-zinc-500 text-sm">
+          Loading incoming orders...
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const naira = n => '₦' + Number(n).toLocaleString('en-NG');
+
+    async function fetchOrders() {
+      try {
+        const res = await fetch('/api/orders');
+        const orders = await res.json();
+        renderOrders(orders);
+      } catch (err) {
+        console.error('Failed to load orders', err);
+      }
+    }
+
+    function renderOrders(orders) {
+      const counts = { confirmed: 0, cooking: 0, dispatched: 0, delivered: 0 };
+      orders.forEach(o => { if (counts[o.status] !== undefined) counts[o.status]++; });
+
+      document.getElementById('count-confirmed').textContent = counts.confirmed;
+      document.getElementById('count-cooking').textContent = counts.cooking;
+      document.getElementById('count-dispatched').textContent = counts.dispatched;
+      document.getElementById('count-delivered').textContent = counts.delivered;
+
+      const container = document.getElementById('ordersContainer');
+      if (!orders.length) {
+        container.innerHTML = `<div class="col-span-full bg-zinc-900 border border-zinc-800 rounded-3xl p-12 text-center text-zinc-400 space-y-2">
+          <i class="fa-solid fa-plate-wheat text-3xl text-zinc-600 mb-2"></i>
+          <h4 class="text-base font-bold text-white">No active orders yet</h4>
+          <p class="text-xs text-zinc-500">New orders placed by customers on the storefront will appear here live with sound notification.</p>
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(o => {
+        const statusColors = {
+          confirmed: 'bg-amber-400/10 text-amber-400 border-amber-400/30',
+          cooking: 'bg-blue-400/10 text-blue-400 border-blue-400/30',
+          dispatched: 'bg-purple-400/10 text-purple-400 border-purple-400/30',
+          delivered: 'bg-emerald-400/10 text-emerald-400 border-emerald-400/30'
+        };
+
+        const itemsList = o.items.map(it => `
+          <div class="flex justify-between items-start text-xs py-1 border-b border-zinc-800/60 last:border-0">
+            <div>
+              <span class="font-bold text-white">${it.qty}x ${it.name}</span>
+              ${it.swallow ? `<div class="text-[10px] text-amber-300">↳ Swallow: ${it.swallow}</div>` : ''}
+              ${it.extras && it.extras.length ? `<div class="text-[10px] text-zinc-400">↳ + ${it.extras.join(', ')}</div>` : ''}
+              ${it.note ? `<div class="text-[10px] text-zinc-500 italic">"Note: ${it.note}"</div>` : ''}
+            </div>
+            <span class="text-zinc-400 font-mono">${naira(it.unit * it.qty)}</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 flex flex-col justify-between space-y-4 shadow-sm hover:border-zinc-700 transition">
+            <div class="space-y-3">
+              <!-- Top Row: ID & Status Badge -->
+              <div class="flex justify-between items-center">
+                <span class="font-mono font-black text-amber-400 text-sm tracking-wider">${o.id}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusColors[o.status] || ''}">
+                  ${o.status}
+                </span>
+              </div>
+
+              <!-- Customer info -->
+              <div class="bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80 space-y-1">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-white text-xs">${o.customerName}</span>
+                  <a href="tel:${o.phone}" class="text-[11px] text-amber-400 hover:underline"><i class="fa-solid fa-phone"></i> ${o.phone}</a>
+                </div>
+                <div class="text-[11px] text-zinc-400 flex items-start gap-1">
+                  <i class="fa-solid fa-location-dot text-amber-500 mt-0.5"></i>
+                  <span>${o.address}</span>
+                </div>
+              </div>
+
+              <!-- Food items -->
+              <div class="space-y-1 pt-1">
+                <div class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Ordered Food Items</div>
+                <div class="bg-zinc-950/50 p-2.5 rounded-xl border border-zinc-800/60 max-h-40 overflow-y-auto">
+                  ${itemsList}
+                </div>
+              </div>
+
+              <!-- Bill Totals -->
+              <div class="flex justify-between items-baseline pt-2 border-t border-zinc-800 text-xs">
+                <span class="text-zinc-400">Total (${o.paymentMode.toUpperCase()}):</span>
+                <span class="font-black text-base text-white">${naira(o.total)}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons based on status -->
+            <div class="pt-2 border-t border-zinc-800/80 flex gap-2">
+              ${o.status === 'confirmed' ? `
+                <button onclick="updateStatus('${o.id}', 'cooking')" class="flex-1 bg-amber-400 hover:bg-amber-500 text-zinc-950 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow">
+                  <i class="fa-solid fa-fire-burner"></i> Start Cooking
+                </button>
+              ` : ''}
+
+              ${o.status === 'cooking' ? `
+                <button onclick="updateStatus('${o.id}', 'dispatched')" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow">
+                  <i class="fa-solid fa-motorcycle"></i> Hand to Rider
+                </button>
+              ` : ''}
+
+              ${o.status === 'dispatched' ? `
+                <button onclick="updateStatus('${o.id}', 'delivered')" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow">
+                  <i class="fa-solid fa-circle-check"></i> Mark Delivered
+                </button>
+              ` : ''}
+
+              ${o.status === 'delivered' ? `
+                <div class="w-full text-center py-2 text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 rounded-xl">
+                  ✓ Order Completed
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateStatus(id, newStatus) {
+      try {
+        const res = await fetch(`/api/orders/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) fetchOrders();
+      } catch (e) {
+        alert('Failed to update order status');
+      }
+    }
+
+    fetchOrders();
+    setInterval(fetchOrders, 4000); // 4-second real-time polling
+  </script>
+</body>
+</html>

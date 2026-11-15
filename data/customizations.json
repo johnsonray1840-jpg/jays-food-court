@@ -1,0 +1,281 @@
+[
+  {
+    "id": "grp_swallow_selection",
+    "name": "Swallow Selection",
+    "description": "Hot authentic wraps freshly prepared. 1 wrap is included with soup dishes.",
+    "selectionType": "quantity",
+    "minSelectable": 1,
+    "maxSelectable": 10,
+    "includedQuantity": 1,
+    "isRequired": true,
+    "allowMultipleCombinations": true,
+    "displayOrder": 1,
+    "options": [
+      {
+        "id": "opt_pounded_yam",
+        "groupId": "grp_swallow_selection",
+        "name": "Pounded Yam",
+        "additionalPrice": 500,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 1,
+        "desc": "Smooth, stretchy authentic pounded yam"
+      },
+      {
+        "id": "opt_eba",
+        "groupId": "grp_swallow_selection",
+        "name": "Eba",
+        "additionalPrice": 300,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 2,
+        "desc": "Hot yellow garri cooked to soft perfection"
+      },
+      {
+        "id": "opt_semovita",
+        "groupId": "grp_swallow_selection",
+        "name": "Semovita",
+        "additionalPrice": 400,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 3,
+        "desc": "Fluffy golden semolina wrap"
+      },
+      {
+        "id": "opt_fufu",
+        "groupId": "grp_swallow_selection",
+        "name": "Fufu",
+        "additionalPrice": 300,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 4,
+        "desc": "Traditional fermented cassava fufu"
+      }
+    ]
+  },
+  {
+    "id": "grp_protein_selection",
+    "name": "Protein Selection",
+    "description": "Slow-cooked assorted meats, fish, and savory proteins.",
+    "selectionType": "quantity",
+    "minSelectable": 0,
+    "maxSelectable": 20,
+    "includedQuantity": 0,
+    "isRequired": false,
+    "allowMultipleCombinations": true,
+    "displayOrder": 2,
+    "options": [
+      {
+        "id": "opt_beef",
+        "groupId": "grp_protein_selection",
+        "name": "Beef",
+        "additionalPrice": 500,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 1,
+        "desc": "Tender seasoned bite-sized beef"
+      },
+      {
+        "id": "opt_stockfish",
+        "groupId": "grp_protein_selection",
+        "name": "Stockfish",
+        "additionalPrice": 700,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 2,
+        "desc": "Aromatic Norwegian okporoko stockfish"
+      },
+      {
+        "id": "opt_goat_meat",
+        "groupId": "grp_protein_selection",
+        "name": "Goat Meat",
+        "additionalPrice": 900,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 3,
+        "desc": "Slow-braised spiced local chevon"
+      },
+      {
+        "id": "opt_chicken",
+        "groupId": "grp_protein_selection",
+        "name": "Chicken",
+        "additionalPrice": 800,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 4,
+        "desc": "Golden crispy fried seasoned chicken"
+      },
+      {
+        "id": "opt_assorted_beef",
+        "groupId": "grp_protein_selection",
+        "name": "Extra Assorted Beef",
+        "additionalPrice": 1200,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 5,
+        "desc": "Assorted shaki, cow leg and beef cuts"
+      },
+      {
+        "id": "opt_fresh_catfish",
+        "groupId": "grp_protein_selection",
+        "name": "Fresh Catfish / Titus Fish",
+        "additionalPrice": 1800,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 6,
+        "desc": "Fresh fish steak in rich broth"
+      },
+      {
+        "id": "opt_fried_plantain",
+        "groupId": "grp_protein_selection",
+        "name": "Fried Plantain (Dodo)",
+        "additionalPrice": 500,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 7,
+        "desc": "Sweet golden ripe plantain slices"
+      },
+      {
+        "id": "opt_boiled_egg",
+        "groupId": "grp_protein_selection",
+        "name": "Boiled Egg",
+        "additionalPrice": 300,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 8,
+        "desc": "Hard-boiled farm egg"
+      }
+    ]
+  },
+  {
+    "id": "grp_drinks_beverages",
+    "name": "Drinks & Beverages",
+    "description": "Chilled spring water, juices and cold refreshments.",
+    "selectionType": "quantity",
+    "minSelectable": 0,
+    "maxSelectable": 20,
+    "includedQuantity": 0,
+    "isRequired": false,
+    "allowMultipleCombinations": true,
+    "displayOrder": 3,
+    "options": [
+      {
+        "id": "opt_bottled_water",
+        "groupId": "grp_drinks_beverages",
+        "name": "Bottled Water",
+        "additionalPrice": 250,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 20,
+        "displayOrder": 1,
+        "desc": "Pure chilled 75cl bottled spring water"
+      },
+      {
+        "id": "opt_chilled_coke",
+        "groupId": "grp_drinks_beverages",
+        "name": "Chilled Coca-Cola (50cl)",
+        "additionalPrice": 400,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 2,
+        "desc": "Ice-cold classic Coca-Cola pet bottle"
+      },
+      {
+        "id": "opt_zobo_drink",
+        "groupId": "grp_drinks_beverages",
+        "name": "Fresh Hibiscus Zobo Drink",
+        "additionalPrice": 600,
+        "isAvailable": true,
+        "minQuantity": 0,
+        "maxQuantity": 10,
+        "displayOrder": 3,
+        "desc": "Spiced natural hibiscus infusion with ginger & cloves"
+      }
+    ]
+  },
+  {
+    "id": "grp_portion_size",
+    "name": "Portion Size",
+    "description": "Select your preferred meal serving size.",
+    "selectionType": "single",
+    "minSelectable": 1,
+    "maxSelectable": 1,
+    "includedQuantity": 1,
+    "isRequired": false,
+    "allowMultipleCombinations": false,
+    "displayOrder": 4,
+    "options": [
+      {
+        "id": "opt_portion_regular",
+        "groupId": "grp_portion_size",
+        "name": "Regular Portion",
+        "additionalPrice": 0,
+        "isAvailable": true,
+        "minQuantity": 1,
+        "maxQuantity": 1,
+        "displayOrder": 1,
+        "desc": "Standard single satisfying serving"
+      },
+      {
+        "id": "opt_portion_large",
+        "groupId": "grp_portion_size",
+        "name": "Large Double Portion",
+        "additionalPrice": 1500,
+        "isAvailable": true,
+        "minQuantity": 1,
+        "maxQuantity": 1,
+        "displayOrder": 2,
+        "desc": "Generous double serving with extra sauce"
+      }
+    ]
+  },
+  {
+    "id": "grp_prep_style",
+    "name": "Preparation Style",
+    "description": "Customize spice level and cooking preference.",
+    "selectionType": "single",
+    "minSelectable": 0,
+    "maxSelectable": 1,
+    "includedQuantity": 1,
+    "isRequired": false,
+    "allowMultipleCombinations": false,
+    "displayOrder": 5,
+    "options": [
+      {
+        "id": "opt_prep_mild",
+        "groupId": "grp_prep_style",
+        "name": "Mild Spice",
+        "additionalPrice": 0,
+        "isAvailable": true,
+        "minQuantity": 1,
+        "maxQuantity": 1,
+        "displayOrder": 1,
+        "desc": "Subtle peppers and balanced herbs"
+      },
+      {
+        "id": "opt_prep_hot",
+        "groupId": "grp_prep_style",
+        "name": "Extra Spicy Firewood",
+        "additionalPrice": 0,
+        "isAvailable": true,
+        "minQuantity": 1,
+        "maxQuantity": 1,
+        "displayOrder": 2,
+        "desc": "Traditional authentic high heat"
+      }
+    ]
+  }
+]
