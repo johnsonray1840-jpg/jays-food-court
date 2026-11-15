@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingBag, MapPin, ChevronDown, User } from 'lucide-react';
 
 interface NavbarProps {
@@ -29,15 +30,21 @@ export function Navbar({
 
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-11 h-11 rounded-full bg-brand-gold flex items-center justify-center font-serif font-black text-xl text-brand-ink shadow-sm group-hover:scale-105 transition">
-            J
+          <div className="relative h-12 w-28 sm:w-32 transition-transform duration-200 group-hover:scale-105">
+            <Image
+              src="/images/logo.png"
+              alt="Jay's Food Court LTD Logo"
+              fill
+              priority
+              className="object-contain object-left"
+            />
           </div>
-          <div className="flex flex-col">
-            <span className="font-serif font-black text-xl text-brand-ink tracking-tight leading-none">
-              Jay&apos;s Food Court
-            </span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-brand-gold mt-0.5">
+          <div className="hidden sm:flex flex-col border-l border-brand-line pl-3">
+            <span className="text-[10px] uppercase font-black tracking-widest text-brand-gold">
               Agbani, Enugu
+            </span>
+            <span className="text-[11px] font-medium text-zinc-500">
+              Kitchen Hub
             </span>
           </div>
         </Link>

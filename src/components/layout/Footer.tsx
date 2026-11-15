@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Utensils, MapPin, Phone, ShieldCheck, Flame, ArrowUpRight } from 'lucide-react';
 
 export function Footer() {
@@ -9,13 +10,15 @@ export function Footer() {
         
         {/* Brand Information */}
         <div className="space-y-4">
-          <a href="#top" className="flex items-center gap-2.5 font-serif font-bold text-2xl text-white">
-            <span className="w-9 h-9 rounded-xl bg-brand-gold flex items-center justify-center text-brand-ink">
-              <Utensils className="w-5 h-5" />
-            </span>
-            <span>
-              Jay&apos;s <span className="text-brand-gold">FoodCourt</span>
-            </span>
+          <a href="#top" className="inline-flex items-center gap-3">
+            <div className="relative h-14 w-32 bg-white/5 backdrop-blur-sm p-1.5 rounded-xl border border-white/10">
+              <Image
+                src="/images/logo.png"
+                alt="Jay's Food Court LTD Logo"
+                fill
+                className="object-contain p-1"
+              />
+            </div>
           </a>
           <p className="text-zinc-400 text-sm leading-relaxed max-w-sm">
             Ultra-premium dining and fast concierge food delivery across Agbani and Enugu State. Cooked with authentic local culinary pride.

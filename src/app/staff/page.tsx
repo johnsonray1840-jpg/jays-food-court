@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Lock,
   ShieldCheck,
@@ -108,17 +109,20 @@ export default function PrivateStaffPortal() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Terminal Header */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center mb-4 shadow-lg shadow-brand-gold/5">
-            <Lock className="w-7 h-7 text-brand-gold" />
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="relative h-16 w-36 mb-3">
+            <Image
+              src="/images/logo.png"
+              alt="Jay's Food Court LTD Logo"
+              fill
+              priority
+              className="object-contain"
+            />
           </div>
           <span className="text-[11px] font-mono tracking-widest uppercase text-brand-gold/80 bg-brand-gold/10 px-3 py-1 rounded-full border border-brand-gold/20">
             Internal Operations Portal
           </span>
-          <h1 className="text-2xl font-black text-white mt-3 tracking-tight">
-            Jay&apos;s Food Court
-          </h1>
-          <p className="text-xs text-brand-cream/60 mt-1">
+          <p className="text-xs text-brand-cream/60 mt-2">
             Authorized Personnel &amp; Staff Access Terminal
           </p>
         </div>
